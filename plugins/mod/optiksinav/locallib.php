@@ -340,5 +340,9 @@ function optiksinav_grade_attempt(stdClass $attempt, stdClass $instance): stdCla
     $attempt->timemodified = $now;
     $DB->update_record('optiksinav_attempt', $attempt);
 
+    // Net puanı Moodle not defterine işle.
+    require_once(__DIR__.'/lib.php');
+    optiksinav_update_grades($instance, $attempt->userid);
+
     return $attempt;
 }

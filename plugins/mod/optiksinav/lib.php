@@ -59,6 +59,7 @@ function optiksinav_add_instance($data, $mform = null) {
     $data->id = $DB->insert_record('optiksinav', $data);
 
     optiksinav_save_pdf_files($data);
+    optiksinav_grade_item_update($data);
 
     return $data->id;
 }
@@ -79,6 +80,8 @@ function optiksinav_update_instance($data, $mform = null) {
     $result = $DB->update_record('optiksinav', $data);
 
     optiksinav_save_pdf_files($data);
+    optiksinav_grade_item_update($data);
+    optiksinav_update_grades($data);
 
     return $result;
 }
@@ -92,9 +95,13 @@ function optiksinav_update_instance($data, $mform = null) {
 function optiksinav_delete_instance($id) {
     global $DB;
 
-    if (!$DB->record_exists('optiksinav', ['id' => $id])) {
+    $instance = $DB->get_record('optiksinav', ['id' => $id]);
+    if (!$instance) {
         return false;
     }
+
+    // Not defteri grade item'ı temizle.
+    optiksinav_grade_item_delete($instance);
 
     // İlişkili denemelerin cevapları → denemeler → cevap anahtarı → örnek.
     $attemptids = $DB->get_fieldset_select('optiksinav_attempt', 'id', 'optiksinavid = ?', [$id]);
@@ -139,10 +146,9 @@ function optiksinav_save_pdf_files(stdClass $data): void {
 /**
  * Serve files from the mod_optiksinav file areas with capability checks.
  *
- * The exam booklet is visible to anyone who can attempt/view the activity.
+ * The exam booklet is visible to anyone who can view the activity.
  * The answer (solution) booklet is restricted to users with the viewreports
- * capability (teachers/managers). Faz 2 will additionally grant students access
- * to the solution once their own attempt is finished.
+ * capability (teachers/managers), plus students who have finished their own attempt.
  *
  * @param stdClass $course The course object.
  * @param stdClass $cm The course module object.
@@ -196,4 +202,102 @@ function optiksinav_pluginfile($course, $cm, $context, $filearea, $args, $forced
 
     // PDF'i indirtmek yerine tarayıcıda göster (lifetime 0 = önbelleksiz, dev için güvenli).
     send_stored_file($file, 0, 0, $forcedownload, $options);
+}
+
+/**
+ * Create or update the grade item for an exam instance, optionally pushing grades.
+ *
+ * @param stdClass $instance The optiksinav instance (must have id, course, name, grade).
+ * @param mixed $grades Optional: an array of grade objects keyed by userid, a single
+ *                      grade object, or the string 'reset'. Null leaves grades untouched.
+ * @return int GRADE_UPDATE_OK / GRADE_UPDATE_FAILED.
+ */
+function optiksinav_grade_item_update($instance, $grades = null) {
+    global $CFG;
+    require_once($CFG->libdir.'/gradelib.php');
+
+    $item = [
+        'itemname' => clean_param($instance->name, PARAM_NOTAGS),
+    ];
+    if (isset($instance->grade) && $instance->grade > 0) {
+        $item['gradetype'] = GRADE_TYPE_VALUE;
+        $item['grademax'] = $instance->grade;
+        $item['grademin'] = 0;
+    } else {
+        $item['gradetype'] = GRADE_TYPE_NONE;
+    }
+
+    if ($grades === 'reset') {
+        $item['reset'] = true;
+        $grades = null;
+    }
+
+    return grade_update('mod/optiksinav', $instance->course, 'mod', 'optiksinav',
+        $instance->id, 0, $grades, $item);
+}
+
+/**
+ * Delete the grade item for an exam instance.
+ *
+ * @param stdClass $instance The optiksinav instance.
+ * @return int GRADE_UPDATE_OK / GRADE_UPDATE_FAILED.
+ */
+function optiksinav_grade_item_delete($instance) {
+    global $CFG;
+    require_once($CFG->libdir.'/gradelib.php');
+
+    return grade_update('mod/optiksinav', $instance->course, 'mod', 'optiksinav',
+        $instance->id, 0, null, ['deleted' => 1]);
+}
+
+/**
+ * Return the gradebook grades for an instance as userid => {userid, rawgrade}.
+ *
+ * The best (highest) finished attempt is used per user.
+ *
+ * @param stdClass $instance The optiksinav instance.
+ * @param int $userid Limit to one user, or 0 for all.
+ * @return array<int,stdClass> Grades keyed by user id.
+ */
+function optiksinav_get_user_grades($instance, $userid = 0) {
+    global $DB;
+
+    $params = ['optiksinavid' => $instance->id, 'state' => 'finished'];
+    $where = 'optiksinavid = :optiksinavid AND state = :state AND grade IS NOT NULL';
+    if ($userid) {
+        $where .= ' AND userid = :userid';
+        $params['userid'] = $userid;
+    }
+
+    $records = $DB->get_records_select('optiksinav_attempt', $where, $params, '', 'id, userid, grade');
+    $grades = [];
+    foreach ($records as $rec) {
+        if (!isset($grades[$rec->userid]) || $rec->grade > $grades[$rec->userid]->rawgrade) {
+            $grades[$rec->userid] = (object)['userid' => $rec->userid, 'rawgrade' => $rec->grade];
+        }
+    }
+    return $grades;
+}
+
+/**
+ * Push grades to the gradebook for an instance (one user or all).
+ *
+ * @param stdClass $instance The optiksinav instance.
+ * @param int $userid Limit to one user, or 0 for all.
+ * @param bool $nullifnone When true and a single user has no grade, write a null grade.
+ * @return void
+ */
+function optiksinav_update_grades($instance, $userid = 0, $nullifnone = true) {
+    global $CFG;
+    require_once($CFG->libdir.'/gradelib.php');
+
+    if (!isset($instance->grade) || $instance->grade == 0) {
+        optiksinav_grade_item_update($instance);
+    } else if ($grades = optiksinav_get_user_grades($instance, $userid)) {
+        optiksinav_grade_item_update($instance, $grades);
+    } else if ($userid && $nullifnone) {
+        optiksinav_grade_item_update($instance, (object)['userid' => $userid, 'rawgrade' => null]);
+    } else {
+        optiksinav_grade_item_update($instance);
+    }
 }
