@@ -1,0 +1,15 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Docker yerel veriler (volume kullanıyoruz ama yine de)
+data/
+*.log
+
+# PHP araçları
+/vendor/
+composer.lock
+.phpunit.result.cache

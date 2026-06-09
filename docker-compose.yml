@@ -1,0 +1,54 @@
+# Moodle 4.5 LTS yerel geliştirme ortamı (OptikSınav eklenti geliştirme)
+# Eklenti kaynak kodu ./plugins altından konteynerin mod/ ve local/ dizinlerine bind-mount edilir;
+# böylece host'ta düzenle → konteynerde anında görünür.
+services:
+  mariadb:
+    image: docker.io/bitnami/mariadb:11.4
+    environment:
+      - ALLOW_EMPTY_PASSWORD=no
+      - MARIADB_USER=bn_moodle
+      - MARIADB_PASSWORD=bn_moodle_pass
+      - MARIADB_DATABASE=bitnami_moodle
+      - MARIADB_ROOT_PASSWORD=root_pass
+      - MARIADB_CHARACTER_SET=utf8mb4
+      - MARIADB_COLLATE=utf8mb4_unicode_ci
+    volumes:
+      - mariadb_data:/bitnami/mariadb
+    healthcheck:
+      test: ["CMD", "/opt/bitnami/scripts/mariadb/healthcheck.sh"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  moodle:
+    image: docker.io/bitnami/moodle:4.5
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    environment:
+      - MOODLE_DATABASE_HOST=mariadb
+      - MOODLE_DATABASE_PORT_NUMBER=3306
+      - MOODLE_DATABASE_USER=bn_moodle
+      - MOODLE_DATABASE_PASSWORD=bn_moodle_pass
+      - MOODLE_DATABASE_NAME=bitnami_moodle
+      - MOODLE_USERNAME=admin
+      - MOODLE_PASSWORD=Admin12345!
+      - MOODLE_EMAIL=admin@example.com
+      - MOODLE_SITE_NAME=OptikSinav Dev
+      # Geliştirme: hata ayıklamayı aç
+      - BITNAMI_DEBUG=true
+    volumes:
+      - moodle_data:/bitnami/moodle
+      - moodledata_data:/bitnami/moodledata
+      # Eklentileri kaynaktan mount et (host'ta düzenle, konteynerde anında görünür)
+      - ./plugins/mod/optiksinav:/bitnami/moodle/mod/optiksinav
+      # local_ eklentisi Faz 4'te eklenecek:
+      # - ./plugins/local/optiksinav:/bitnami/moodle/local/optiksinav
+
+volumes:
+  mariadb_data:
+  moodle_data:
+  moodledata_data:
