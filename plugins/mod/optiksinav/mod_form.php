@@ -17,11 +17,21 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/course/moodleform_mod.php');
+require_once($CFG->dirroot.'/mod/optiksinav/locallib.php');
 
 /**
  * Activity settings form shown when adding/editing an Optical exam.
  */
 class mod_optiksinav_mod_form extends moodleform_mod {
+
+    /**
+     * File manager options shared by both PDF upload areas: a single PDF, no subfolders.
+     *
+     * @return array Options array for the filemanager element / file_prepare_draft_area.
+     */
+    private function pdf_filemanager_options(): array {
+        return ['subdirs' => 0, 'maxfiles' => 1, 'accepted_types' => ['.pdf']];
+    }
 
     /**
      * Define the form fields.
@@ -67,10 +77,63 @@ class mod_optiksinav_mod_form extends moodleform_mod {
         $mform->setDefault('penaltyratio', 0.25);
         $mform->addHelpButton('penaltyratio', 'penaltyratio', 'optiksinav');
 
+        // --- PDF kitapçıkları (Moodle File API) ---
+        $mform->addElement('header', 'pdfsettings', get_string('pdfheader', 'optiksinav'));
+
+        $mform->addElement('filemanager', 'exampdf', get_string('exampdf', 'optiksinav'), null,
+            $this->pdf_filemanager_options());
+        $mform->addHelpButton('exampdf', 'exampdf', 'optiksinav');
+
+        $mform->addElement('filemanager', 'answerpdf', get_string('answerpdf', 'optiksinav'), null,
+            $this->pdf_filemanager_options());
+        $mform->addHelpButton('answerpdf', 'answerpdf', 'optiksinav');
+
         // --- Standart Moodle alanları (not, görünürlük, vb.) ---
         $this->standard_grading_coursemodule_elements();
         $this->standard_coursemodule_elements();
 
         $this->add_action_buttons();
+    }
+
+    /**
+     * Pre-fill the PDF filemanager draft areas with any already-stored files when editing.
+     *
+     * @param array $defaultvalues Reference to the form default values.
+     */
+    public function data_preprocessing(&$defaultvalues) {
+        $options = $this->pdf_filemanager_options();
+
+        $examdraft = file_get_submitted_draft_itemid('exampdf');
+        file_prepare_draft_area($examdraft, $this->context->id, 'mod_optiksinav',
+            OPTIKSINAV_FILEAREA_EXAM, OPTIKSINAV_FILE_ITEMID, $options);
+        $defaultvalues['exampdf'] = $examdraft;
+
+        $answerdraft = file_get_submitted_draft_itemid('answerpdf');
+        file_prepare_draft_area($answerdraft, $this->context->id, 'mod_optiksinav',
+            OPTIKSINAV_FILEAREA_ANSWER, OPTIKSINAV_FILE_ITEMID, $options);
+        $defaultvalues['answerpdf'] = $answerdraft;
+    }
+
+    /**
+     * Validate the exam settings.
+     *
+     * @param array $data Submitted data.
+     * @param array $files Submitted files.
+     * @return array Validation errors keyed by element name.
+     */
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+
+        if ($data['questioncount'] < 0) {
+            $errors['questioncount'] = get_string('err_questioncount', 'optiksinav');
+        }
+        if ($data['optioncount'] < 2 || $data['optioncount'] > 12) {
+            $errors['optioncount'] = get_string('err_optioncount', 'optiksinav');
+        }
+        if ($data['penaltyratio'] < 0) {
+            $errors['penaltyratio'] = get_string('err_penaltyratio', 'optiksinav');
+        }
+
+        return $errors;
     }
 }

@@ -24,6 +24,7 @@ $string['optiksinav:view'] = 'View optical exam';
 $string['optiksinav:attempt'] = 'Attempt optical exam';
 $string['optiksinav:viewownresult'] = 'View own result';
 $string['optiksinav:viewreports'] = 'View all results and reports';
+$string['optiksinav:editanswerkey'] = 'Edit the answer key';
 $string['optiksinav:addinstance'] = 'Add a new optical exam';
 
 // Form.
@@ -38,6 +39,35 @@ $string['optioncount'] = 'Number of options';
 $string['optioncount_help'] = 'How many choices each question has (e.g. 5 for A–E).';
 $string['penaltyratio'] = 'Wrong-answer penalty ratio';
 $string['penaltyratio_help'] = 'Net score = correct − (wrong × ratio). 0.25 means 4 wrong answers cancel 1 correct.';
+
+// PDF uploads.
+$string['pdfheader'] = 'Exam booklets (PDF)';
+$string['exampdf'] = 'Question booklet (PDF)';
+$string['exampdf_help'] = 'The PDF shown to students during the exam. One PDF file.';
+$string['answerpdf'] = 'Solution booklet (PDF)';
+$string['answerpdf_help'] = 'The solutions PDF, shown only to teachers (and to students after they finish, in a later phase).';
+
+// Validation.
+$string['err_questioncount'] = 'The number of questions cannot be negative.';
+$string['err_optioncount'] = 'The number of options must be between 2 and 12.';
+$string['err_penaltyratio'] = 'The penalty ratio cannot be negative.';
+
+// Answer key.
+$string['answerkey'] = 'Answer key';
+$string['answerkey_question'] = 'Question {$a}';
+$string['answerkey_unset'] = '—';
+$string['answerkey_noquestions'] = 'Set the number of questions in the exam settings first.';
+$string['answerkey_saved'] = 'Answer key saved.';
+$string['editanswerkey'] = 'Edit answer key';
+
+// View page.
+$string['teacherpanel'] = 'Setup status';
+$string['status_exampdf'] = 'Question booklet uploaded';
+$string['status_answerpdf'] = 'Solution booklet uploaded';
+$string['status_answerkey'] = 'Answer key complete ({$a->filled}/{$a->total})';
+$string['preview_exampdf'] = 'Preview question booklet';
+$string['preview_answerpdf'] = 'Preview solution booklet';
+$string['attempt_comingsoon'] = 'The exam-taking experience will be available soon.';
 
 // Misc.
 $string['modulename_help'] = 'The Optical exam activity presents a PDF question booklet alongside an A–E optical answer sheet, enforces the time limit on the server, computes a net score (correct − wrong × penalty) and feeds it to the gradebook.';

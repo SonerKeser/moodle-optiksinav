@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/optiksinav/db" VERSION="2026060900" COMMENT="OptikSınav (PDF + optik form) aktivite eklentisi şeması"
+<XMLDB PATH="mod/optiksinav/db" VERSION="2026060901" COMMENT="OptikSınav (PDF + optik form) aktivite eklentisi şeması"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
   <TABLES>
@@ -24,6 +24,66 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="course" TYPE="foreign" FIELDS="course" REFTABLE="course" REFFIELDS="id"/>
       </KEYS>
+    </TABLE>
+
+    <TABLE NAME="optiksinav_question" COMMENT="Cevap anahtarı: sınavdaki her soru sırası (slot) için doğru şık. Eski 1.A-2.C string'inin normalize hali.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="optiksinavid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="optiksinav.id"/>
+        <FIELD NAME="slot" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Soru numarası (1..N)."/>
+        <FIELD NAME="correctanswer" TYPE="char" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Doğru şık (A-E). NULL = henüz girilmemiş."/>
+        <FIELD NAME="points" TYPE="number" LENGTH="6" DECIMALS="2" NOTNULL="true" DEFAULT="1.00" SEQUENCE="false" COMMENT="Sorunun ağırlığı (varsayılan 1)."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="optiksinavid" TYPE="foreign" FIELDS="optiksinavid" REFTABLE="optiksinav" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="optiksinavid-slot" UNIQUE="true" FIELDS="optiksinavid, slot"/>
+      </INDEXES>
+    </TABLE>
+
+    <TABLE NAME="optiksinav_attempt" COMMENT="Bir öğrencinin bir sınava verdiği deneme (sunucu-zorlamalı süre + puan özeti).">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="optiksinavid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="optiksinav.id"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="user.id"/>
+        <FIELD NAME="attemptnumber" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Deneme sırası (ileride çoklu deneme için)."/>
+        <FIELD NAME="state" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="inprogress" SEQUENCE="false" COMMENT="inprogress | finished | abandoned"/>
+        <FIELD NAME="timestart" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Sunucu tarafı başlangıç (unix)."/>
+        <FIELD NAME="timefinish" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Bitiş (unix). 0 = devam ediyor."/>
+        <FIELD NAME="timedue" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Sunucu-zorlamalı son anı (timestart + timelimit)."/>
+        <FIELD NAME="correctcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="wrongcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="blankcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="net" TYPE="number" LENGTH="10" DECIMALS="5" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="doğru − yanlış×ceza."/>
+        <FIELD NAME="grade" TYPE="number" LENGTH="10" DECIMALS="5" NOTNULL="false" SEQUENCE="false" COMMENT="Not defterine yazılan ölçeklenmiş not."/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="optiksinavid" TYPE="foreign" FIELDS="optiksinavid" REFTABLE="optiksinav" REFFIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="optiksinavid-userid" UNIQUE="false" FIELDS="optiksinavid, userid"/>
+      </INDEXES>
+    </TABLE>
+
+    <TABLE NAME="optiksinav_attempt_answer" COMMENT="Bir denemedeki her soru için öğrencinin işaretlediği şık.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="attemptid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="optiksinav_attempt.id"/>
+        <FIELD NAME="slot" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Soru numarası (1..N)."/>
+        <FIELD NAME="answer" TYPE="char" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="İşaretlenen şık (A-E). NULL/boş = boş bırakılmış."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="attemptid" TYPE="foreign" FIELDS="attemptid" REFTABLE="optiksinav_attempt" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="attemptid-slot" UNIQUE="true" FIELDS="attemptid, slot"/>
+      </INDEXES>
     </TABLE>
   </TABLES>
 </XMLDB>

@@ -62,6 +62,16 @@ $capabilities = [
         ],
     ],
 
+    // Cevap anahtarını düzenleme.
+    'mod/optiksinav:editanswerkey' => [
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => [
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+
     // Aktiviteyi ekleme/düzenleme.
     'mod/optiksinav:addinstance' => [
         'riskbitmask' => RISK_XSS,

@@ -15,10 +15,10 @@
  */
 
 require(__DIR__.'/../../config.php');
+require_once(__DIR__.'/locallib.php');
 
-// Course module id, or the instance id.
-$id = optional_param('id', 0, PARAM_INT);
-$o  = optional_param('o', 0, PARAM_INT);
+$id = optional_param('id', 0, PARAM_INT); // Course module id.
+$o  = optional_param('o', 0, PARAM_INT);  // ... or optiksinav instance id.
 
 if ($id) {
     $cm = get_coursemodule_from_id('optiksinav', $id, 0, false, MUST_EXIST);
@@ -31,15 +31,27 @@ if ($id) {
 }
 
 require_login($course, true, $cm);
+$context = context_module::instance($cm->id);
+require_capability('mod/optiksinav:view', $context);
 
-$modulecontext = context_module::instance($cm->id);
-require_capability('mod/optiksinav:view', $modulecontext);
+// Completion + analitik için görüntüleme olayını işle.
+$event = \mod_optiksinav\event\course_module_viewed::create([
+    'objectid' => $moduleinstance->id,
+    'context' => $context,
+]);
+$event->add_record_snapshot('course', $course);
+$event->add_record_snapshot('optiksinav', $moduleinstance);
+$event->trigger();
 
-// Log the view (completion + analytics) — Faz 2'de event sınıfı eklenecek.
+$completion = new completion_info($course);
+$completion->set_module_viewed($cm);
+
 $PAGE->set_url('/mod/optiksinav/view.php', ['id' => $cm->id]);
 $PAGE->set_title(format_string($moduleinstance->name));
 $PAGE->set_heading(format_string($course->fullname));
-$PAGE->set_context($modulecontext);
+$PAGE->set_context($context);
+
+$canmanage = has_capability('mod/optiksinav:editanswerkey', $context);
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string($moduleinstance->name));
@@ -48,10 +60,69 @@ if (!empty($moduleinstance->intro)) {
     echo $OUTPUT->box(format_module_intro('optiksinav', $moduleinstance, $cm->id), 'generalbox', 'intro');
 }
 
-// Faz 0 yer tutucu — sınav deneyimi Faz 2'de gelecek.
-echo $OUTPUT->notification(
-    get_string('questioncount', 'optiksinav') . ': ' . $moduleinstance->questioncount,
-    \core\output\notification::NOTIFY_INFO
-);
+// --- Sınav özeti ---
+$hasexampdf = optiksinav_has_file($context, OPTIKSINAV_FILEAREA_EXAM);
+$hasanswerpdf = optiksinav_has_file($context, OPTIKSINAV_FILEAREA_ANSWER);
+$keyfilled = optiksinav_answer_key_filled_count($moduleinstance->id);
+
+$summary = new html_table();
+$summary->attributes['class'] = 'generaltable';
+$summary->data = [
+    [get_string('questioncount', 'optiksinav'), $moduleinstance->questioncount],
+    [get_string('optioncount', 'optiksinav'),
+        implode(' ', optiksinav_get_option_letters($moduleinstance->optioncount))],
+    [get_string('penaltyratio', 'optiksinav'), format_float($moduleinstance->penaltyratio, 2)],
+    [get_string('timelimit', 'optiksinav'),
+        $moduleinstance->timelimit ? format_time($moduleinstance->timelimit) : get_string('none')],
+];
+echo html_writer::table($summary);
+
+// --- Öğretmen paneli: hazırlık durumu + düzenleme bağlantıları ---
+if ($canmanage) {
+    echo $OUTPUT->heading(get_string('teacherpanel', 'optiksinav'), 4);
+
+    $checklist = html_writer::start_tag('ul');
+    $checklist .= optiksinav_checklist_item($hasexampdf, get_string('status_exampdf', 'optiksinav'));
+    $checklist .= optiksinav_checklist_item($hasanswerpdf, get_string('status_answerpdf', 'optiksinav'));
+    $checklist .= optiksinav_checklist_item(
+        $moduleinstance->questioncount > 0 && $keyfilled >= $moduleinstance->questioncount,
+        get_string('status_answerkey', 'optiksinav',
+            ['filled' => $keyfilled, 'total' => $moduleinstance->questioncount]));
+    $checklist .= html_writer::end_tag('ul');
+    echo html_writer::div($checklist, 'box generalbox');
+
+    $editkeyurl = new moodle_url('/mod/optiksinav/editkey.php', ['id' => $cm->id]);
+    echo html_writer::div(
+        $OUTPUT->single_button($editkeyurl, get_string('editanswerkey', 'optiksinav'), 'get'),
+        'mb-3');
+
+    // Yüklü PDF'leri öğretmenin önizlemesi için bağlantılar.
+    if ($examurl = optiksinav_get_file_url($context, OPTIKSINAV_FILEAREA_EXAM)) {
+        echo html_writer::div(html_writer::link($examurl, get_string('preview_exampdf', 'optiksinav'),
+            ['target' => '_blank']));
+    }
+    if ($answerurl = optiksinav_get_file_url($context, OPTIKSINAV_FILEAREA_ANSWER)) {
+        echo html_writer::div(html_writer::link($answerurl, get_string('preview_answerpdf', 'optiksinav'),
+            ['target' => '_blank']));
+    }
+} else {
+    // --- Öğrenci görünümü (sınav deneyimi Faz 2'de) ---
+    echo $OUTPUT->notification(get_string('attempt_comingsoon', 'optiksinav'),
+        \core\output\notification::NOTIFY_INFO);
+}
 
 echo $OUTPUT->footer();
+
+/**
+ * Render a single ✓/✗ checklist line.
+ *
+ * @param bool $ok Whether the item is satisfied.
+ * @param string $label The item label.
+ * @return string HTML list item.
+ */
+function optiksinav_checklist_item(bool $ok, string $label): string {
+    $icon = $ok
+        ? html_writer::tag('span', '✓ ', ['style' => 'color:green;font-weight:bold'])
+        : html_writer::tag('span', '✗ ', ['style' => 'color:#cc0000;font-weight:bold']);
+    return html_writer::tag('li', $icon.$label);
+}
