@@ -47,6 +47,7 @@ $columns = [
     'net' => get_string('net', 'optiksinav'),
     'grade' => get_string('grade', 'optiksinav'),
     'duration' => get_string('duration', 'optiksinav'),
+    'focusloss' => get_string('focusloss', 'optiksinav'),
 ];
 
 $data = [];
@@ -62,6 +63,7 @@ foreach ($rows as $r) {
         'net' => format_float($r->net, 2),
         'grade' => $r->grade === null ? '' : format_float($r->grade, 2),
         'duration' => $duration,
+        'focusloss' => $r->focuslosscount,
         '_attemptid' => $r->id,
         '_state' => $r->state,
     ];
@@ -111,7 +113,7 @@ $table->head[] = '';
 $table->attributes['class'] = 'generaltable';
 foreach ($data as $row) {
     $cells = [$row->student, $row->state, $row->correct, $row->wrong, $row->blank,
-        $row->net, $row->grade, $row->duration];
+        $row->net, $row->grade, $row->duration, $row->focusloss];
     if ($row->_state === OPTIKSINAV_STATE_FINISHED) {
         $reviewurl = new moodle_url('/mod/optiksinav/review.php',
             ['id' => $cm->id, 'attemptid' => $row->_attemptid]);

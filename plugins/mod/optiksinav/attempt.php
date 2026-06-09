@@ -28,6 +28,12 @@ require_login($course, false, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/optiksinav:attempt', $context);
 
+// Safe Exam Browser zorunluysa ve sağlanmıyorsa hiçbir deneme işlemine izin verme.
+if (!optiksinav_seb_satisfied($instance)) {
+    redirect(new moodle_url('/mod/optiksinav/view.php', ['id' => $cm->id]),
+        get_string('sebrequired', 'optiksinav'), null, \core\output\notification::NOTIFY_ERROR);
+}
+
 $viewurl = new moodle_url('/mod/optiksinav/view.php', ['id' => $cm->id]);
 $attempturl = new moodle_url('/mod/optiksinav/attempt.php', ['id' => $cm->id]);
 $reviewurl = new moodle_url('/mod/optiksinav/review.php', ['id' => $cm->id]);
@@ -75,7 +81,8 @@ $PAGE->set_url($attempturl);
 $PAGE->set_title(format_string($instance->name));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_context($context);
-$PAGE->set_pagelayout('incourse');
+// Güvenli düzen: blokları/gezinmeyi gizler, sınav ortamını sadeleştirir.
+$PAGE->set_pagelayout('secure');
 
 $examurl = optiksinav_get_file_url($context, OPTIKSINAV_FILEAREA_EXAM);
 $letters = optiksinav_get_option_letters($instance->optioncount);
@@ -108,7 +115,8 @@ echo html_writer::start_div('col-xl-4');
 
 if ($attempt->timedue > 0) {
     echo html_writer::div('', 'optiksinav-timer alert alert-info text-center fw-bold',
-        ['id' => 'optiksinav-timer']);
+        ['id' => 'optiksinav-timer', 'role' => 'timer', 'aria-live' => 'off',
+         'aria-label' => get_string('timeremaining', 'optiksinav')]);
 }
 
 $answeredinit = 0;
@@ -117,7 +125,7 @@ foreach ($saved as $a) {
         $answeredinit++;
     }
 }
-echo html_writer::start_div('mb-2');
+echo html_writer::start_div('mb-2', ['aria-live' => 'polite', 'aria-atomic' => 'true']);
 echo html_writer::tag('span', get_string('answeredcount', 'optiksinav', $answeredinit),
     ['class' => 'badge bg-primary', 'id' => 'optiksinav-answered']);
 echo ' ';
@@ -139,9 +147,12 @@ echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', '
 
 echo html_writer::start_div('optiksinav-sheet', ['style' => 'max-height:70vh;overflow-y:auto;']);
 for ($slot = 1; $slot <= $instance->questioncount; $slot++) {
-    echo html_writer::start_div('optiksinav-q d-flex align-items-center mb-2',
-        ['data-slot' => $slot]);
-    echo html_writer::tag('span', $slot.'.', ['class' => 'me-2 fw-bold', 'style' => 'width:2.5em;']);
+    // Her soru bir fieldset/legend — ekran okuyucular için gruplanmış radyo seti.
+    echo html_writer::start_tag('fieldset',
+        ['class' => 'optiksinav-q d-flex align-items-center mb-2 border-0 p-0', 'data-slot' => $slot]);
+    echo html_writer::tag('legend',
+        get_string('answerkey_question', 'optiksinav', $slot),
+        ['class' => 'me-2 fw-bold float-none w-auto fs-6', 'style' => 'min-width:3.5em;']);
     foreach ($letters as $letter) {
         $inputid = "q{$slot}_{$letter}";
         $checked = (isset($saved[$slot]) && $saved[$slot] === $letter) ? ['checked' => 'checked'] : [];
@@ -153,11 +164,16 @@ for ($slot = 1; $slot <= $instance->questioncount; $slot++) {
             'id' => $inputid,
             'value' => $letter,
             'data-slot' => $slot,
+            'aria-label' => get_string('answerkey_question', 'optiksinav', $slot).' '.$letter,
         ], $checked));
         echo html_writer::tag('label', $letter, ['class' => 'form-check-label', 'for' => $inputid]);
         echo html_writer::end_div();
     }
-    echo html_writer::end_div();
+    // Klavyeyle erişilebilir "temizle" (çift tıklamanın klavye karşılığı).
+    echo html_writer::tag('button', get_string('clear'),
+        ['type' => 'button', 'class' => 'btn btn-sm btn-link optiksinav-clear',
+         'data-slot' => $slot, 'aria-label' => get_string('clearanswer', 'optiksinav', $slot)]);
+    echo html_writer::end_tag('fieldset');
 }
 echo html_writer::end_div(); // sheet.
 
@@ -177,6 +193,8 @@ $jsconfig = [
     'hasdeadline' => $attempt->timedue > 0,
     'questioncount' => (int)$instance->questioncount,
     'saveurl' => (new moodle_url('/mod/optiksinav/save.php'))->out(false),
+    'flagurl' => (new moodle_url('/mod/optiksinav/flagevent.php'))->out(false),
+    'anticheat' => true,
     'strconfirm' => get_string('confirmfinish', 'optiksinav'),
     'strtimeup' => get_string('timeexpired', 'optiksinav'),
     'stranswered' => get_string('answeredcount', 'optiksinav', '__N__'),

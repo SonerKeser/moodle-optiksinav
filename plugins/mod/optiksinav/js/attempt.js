@@ -136,6 +136,45 @@
         });
     });
 
+    // Klavyeyle erişilebilir "temizle" düğmeleri.
+    form.querySelectorAll('.optiksinav-clear').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var slot = parseInt(btn.dataset.slot, 10);
+            form.querySelectorAll('input[name="q[' + slot + ']"]').forEach(function (r) {
+                r.checked = false;
+            });
+            saveAnswer(slot, '');
+        });
+    });
+
+    // --- Anti-cheat: odak kaybı (sekme değiştirme) bildirimi + kopyalama caydırıcıları ---
+    if (cfg.anticheat && cfg.flagurl) {
+        var reportFocusLoss = function () {
+            var body = 'attemptid=' + encodeURIComponent(cfg.attemptid) +
+                '&event=focusloss&sesskey=' + encodeURIComponent(cfg.sesskey);
+            fetch(cfg.flagurl, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: body,
+                credentials: 'same-origin',
+                keepalive: true
+            }).catch(function () {});
+        };
+
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden && !submitting) {
+                reportFocusLoss();
+            }
+        });
+
+        // Kopyalama/yapıştırma ve sağ tık caydırıcıları (yumuşak; gerçek engel SEB ile).
+        ['contextmenu', 'copy', 'cut', 'paste'].forEach(function (evt) {
+            document.addEventListener(evt, function (e) {
+                e.preventDefault();
+            });
+        });
+    }
+
     // --- Manual finish confirmation ---
     if (form) {
         form.addEventListener('submit', function (e) {

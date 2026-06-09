@@ -38,6 +38,12 @@ if ((int)$attempt->userid !== (int)$USER->id || (int)$attempt->optiksinavid !== 
     throw new moodle_exception('invalidaccess', 'optiksinav');
 }
 
+// Safe Exam Browser zorunluysa ve sağlanmıyorsa teslim alma.
+if (!optiksinav_seb_satisfied($instance)) {
+    redirect($reviewurl, get_string('sebrequired', 'optiksinav'), null,
+        \core\output\notification::NOTIFY_ERROR);
+}
+
 // Zaten bitmişse tekrar puanlama.
 if ($attempt->state === OPTIKSINAV_STATE_INPROGRESS) {
     optiksinav_grade_attempt($attempt, $instance);

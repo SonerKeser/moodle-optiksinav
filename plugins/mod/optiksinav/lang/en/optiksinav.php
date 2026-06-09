@@ -111,6 +111,19 @@ $string['state'] = 'State';
 $string['state_inprogress'] = 'In progress';
 $string['state_finished'] = 'Finished';
 $string['state_abandoned'] = 'Abandoned';
+$string['focusloss'] = 'Tab switches';
+
+// Security / anti-cheat.
+$string['securityheader'] = 'Security';
+$string['requireseb'] = 'Require Safe Exam Browser';
+$string['requireseb_label'] = 'Students must use Safe Exam Browser to attempt this exam';
+$string['requireseb_help'] = 'When enabled, the exam can only be attempted from Safe Exam Browser (detected via its request header). Full configuration-key validation is not performed.';
+$string['sebrequired'] = 'This exam can only be attempted using Safe Exam Browser.';
+$string['timeremaining'] = 'Time remaining';
+$string['clearanswer'] = 'Clear answer for question {$a}';
+
+// Scheduled task.
+$string['task_closeoverdue'] = 'Close and grade overdue exam attempts';
 
 // Misc.
 $string['modulename_help'] = 'The Optical exam activity presents a PDF question booklet alongside an A–E optical answer sheet, enforces the time limit on the server, computes a net score (correct − wrong × penalty) and feeds it to the gradebook.';

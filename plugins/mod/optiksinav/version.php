@@ -17,7 +17,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_optiksinav';   // Full name of the plugin.
-$plugin->version   = 2026060904;         // YYYYMMDDXX – bump on every schema/behaviour change.
+$plugin->version   = 2026060905;         // YYYYMMDDXX – bump on every schema/behaviour change.
 $plugin->requires  = 2024100700;         // Moodle 4.5.0 LTS.
-$plugin->maturity  = MATURITY_ALPHA;     // Faz 4: rapor + privacy + backup/restore.
-$plugin->release   = 'v0.5.0-faz4';
+$plugin->maturity  = MATURITY_ALPHA;     // Faz 5: güvenlik + anti-hile + erişilebilirlik.
+$plugin->release   = 'v0.6.0-faz5';

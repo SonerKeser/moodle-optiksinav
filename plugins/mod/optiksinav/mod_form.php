@@ -88,6 +88,14 @@ class mod_optiksinav_mod_form extends moodleform_mod {
             $this->pdf_filemanager_options());
         $mform->addHelpButton('answerpdf', 'answerpdf', 'optiksinav');
 
+        // --- Güvenlik ---
+        $mform->addElement('header', 'securityheader', get_string('securityheader', 'optiksinav'));
+
+        $mform->addElement('advcheckbox', 'requireseb', get_string('requireseb', 'optiksinav'),
+            get_string('requireseb_label', 'optiksinav'));
+        $mform->setDefault('requireseb', 0);
+        $mform->addHelpButton('requireseb', 'requireseb', 'optiksinav');
+
         // --- Standart Moodle alanları (not, görünürlük, vb.) ---
         $this->standard_grading_coursemodule_elements();
         $this->standard_coursemodule_elements();

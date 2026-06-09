@@ -34,6 +34,9 @@ define('OPTIKSINAV_STATE_FINISHED', 'finished');
 /** Attempt state: the attempt was abandoned (closed without finishing). */
 define('OPTIKSINAV_STATE_ABANDONED', 'abandoned');
 
+/** Request header Safe Exam Browser sends on every request. */
+define('OPTIKSINAV_SEB_HEADER', 'HTTP_X_SAFEEXAMBROWSER_REQUESTHASH');
+
 /**
  * Return the answer-option letters for a given option count, e.g. 5 → ['A','B','C','D','E'].
  *
@@ -345,4 +348,37 @@ function optiksinav_grade_attempt(stdClass $attempt, stdClass $instance): stdCla
     optiksinav_update_grades($instance, $attempt->userid);
 
     return $attempt;
+}
+
+/**
+ * Whether the Safe Exam Browser requirement (if any) is satisfied for this request.
+ *
+ * This is a pragmatic gate: when the exam requires SEB, the request must carry the
+ * SEB request-hash header (or a SEB user agent). Full config-key/browser-exam-key
+ * validation is intentionally out of scope and would be layered on top of this.
+ *
+ * @param stdClass $instance The optiksinav instance.
+ * @return bool True when access is allowed.
+ */
+function optiksinav_seb_satisfied(stdClass $instance): bool {
+    if (empty($instance->requireseb)) {
+        return true;
+    }
+    if (!empty($_SERVER[OPTIKSINAV_SEB_HEADER])) {
+        return true;
+    }
+    $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    return stripos($ua, 'SEB') !== false;
+}
+
+/**
+ * Increment the focus-loss (tab-switch) counter for an in-progress attempt.
+ *
+ * @param int $attemptid The attempt id.
+ * @return void
+ */
+function optiksinav_increment_focusloss(int $attemptid): void {
+    global $DB;
+    $DB->execute('UPDATE {optiksinav_attempt} SET focuslosscount = focuslosscount + 1 WHERE id = ?',
+        [$attemptid]);
 }

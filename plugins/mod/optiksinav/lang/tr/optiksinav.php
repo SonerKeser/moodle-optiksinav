@@ -111,6 +111,19 @@ $string['state'] = 'Durum';
 $string['state_inprogress'] = 'Devam ediyor';
 $string['state_finished'] = 'Tamamlandı';
 $string['state_abandoned'] = 'Terk edildi';
+$string['focusloss'] = 'Sekme değişimi';
+
+// Güvenlik / anti-hile.
+$string['securityheader'] = 'Güvenlik';
+$string['requireseb'] = 'Safe Exam Browser zorunlu';
+$string['requireseb_label'] = 'Öğrenciler bu sınava yalnızca Safe Exam Browser ile girebilsin';
+$string['requireseb_help'] = 'Etkinse, sınav yalnızca Safe Exam Browser üzerinden (istek başlığıyla algılanır) alınabilir. Tam yapılandırma-anahtarı doğrulaması yapılmaz.';
+$string['sebrequired'] = 'Bu sınav yalnızca Safe Exam Browser ile alınabilir.';
+$string['timeremaining'] = 'Kalan süre';
+$string['clearanswer'] = '{$a}. soru için cevabı temizle';
+
+// Zamanlanmış görev.
+$string['task_closeoverdue'] = 'Süresi geçmiş sınav denemelerini kapat ve puanla';
 
 // Genel.
 $string['modulename_help'] = 'Optik Sınav aktivitesi, bir PDF soru kitapçığını A–E optik cevap formuyla birlikte sunar; süreyi sunucu tarafında zorlar, net puanı (doğru − yanlış × ceza) hesaplar ve not defterine işler.';

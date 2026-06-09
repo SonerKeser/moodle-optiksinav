@@ -83,5 +83,23 @@ function xmldb_optiksinav_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2026060901, 'optiksinav');
     }
 
+    // Faz 5: Safe Exam Browser zorunluluğu + odak-kaybı sayacı.
+    if ($oldversion < 2026060905) {
+
+        $table = new xmldb_table('optiksinav');
+        $field = new xmldb_field('requireseb', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'grade');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $table = new xmldb_table('optiksinav_attempt');
+        $field = new xmldb_field('focuslosscount', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'blankcount');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_mod_savepoint(true, 2026060905, 'optiksinav');
+    }
+
     return true;
 }

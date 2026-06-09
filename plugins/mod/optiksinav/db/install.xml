@@ -17,6 +17,7 @@
         <FIELD NAME="optioncount" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="5" SEQUENCE="false" COMMENT="Seçenek sayısı (örn. 5 = A-E)."/>
         <FIELD NAME="penaltyratio" TYPE="number" LENGTH="6" DECIMALS="4" NOTNULL="true" DEFAULT="0.25" SEQUENCE="false" COMMENT="Yanlış başına net düşürme oranı (0.25 = 4 yanlış 1 doğru götürür)."/>
         <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="100" SEQUENCE="false" COMMENT="Maksimum not (gradebook)."/>
+        <FIELD NAME="requireseb" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 = sınav yalnızca Safe Exam Browser ile alınabilir."/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
@@ -56,6 +57,7 @@
         <FIELD NAME="correctcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="wrongcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="blankcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="focuslosscount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Sınav sırasında sekme/odak kaybı sayısı (anti-hile sinyali)."/>
         <FIELD NAME="net" TYPE="number" LENGTH="10" DECIMALS="5" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="doğru − yanlış×ceza."/>
         <FIELD NAME="grade" TYPE="number" LENGTH="10" DECIMALS="5" NOTNULL="false" SEQUENCE="false" COMMENT="Not defterine yazılan ölçeklenmiş not."/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>

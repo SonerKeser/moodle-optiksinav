@@ -38,6 +38,12 @@ require_capability('mod/optiksinav:attempt', $context);
 
 header('Content-Type: application/json; charset=utf-8');
 
+// Safe Exam Browser zorunluysa ve sağlanmıyorsa yazma.
+if (!optiksinav_seb_satisfied($instance)) {
+    echo json_encode(['status' => 'error', 'message' => 'sebrequired']);
+    die();
+}
+
 // Yetki: yalnızca denemenin sahibi yazabilir.
 if ((int)$attempt->userid !== (int)$USER->id) {
     echo json_encode(['status' => 'error', 'message' => 'forbidden']);
