@@ -5,6 +5,14 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * The exam-taking page: PDF booklet + optical answer sheet + server-enforced timer.
@@ -14,8 +22,8 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require(__DIR__.'/../../config.php');
-require_once(__DIR__.'/locallib.php');
+require(__DIR__ . '/../../config.php');
+require_once(__DIR__ . '/locallib.php');
 
 $id = required_param('id', PARAM_INT);              // Course module id.
 $action = optional_param('action', '', PARAM_ALPHA); // 'start' to begin a new attempt.
@@ -30,8 +38,12 @@ require_capability('mod/optiksinav:attempt', $context);
 
 // Safe Exam Browser zorunluysa ve sağlanmıyorsa hiçbir deneme işlemine izin verme.
 if (!optiksinav_seb_satisfied($instance)) {
-    redirect(new moodle_url('/mod/optiksinav/view.php', ['id' => $cm->id]),
-        get_string('sebrequired', 'optiksinav'), null, \core\output\notification::NOTIFY_ERROR);
+    redirect(
+        new moodle_url('/mod/optiksinav/view.php', ['id' => $cm->id]),
+        get_string('sebrequired', 'optiksinav'),
+        null,
+        \core\output\notification::NOTIFY_ERROR
+    );
 }
 
 $viewurl = new moodle_url('/mod/optiksinav/view.php', ['id' => $cm->id]);
@@ -47,12 +59,20 @@ if ($action === 'start' && confirm_sesskey()) {
     }
     if (!$attempt) {
         if (!optiksinav_is_open($instance)) {
-            redirect($viewurl, get_string('notopen', 'optiksinav'), null,
-                \core\output\notification::NOTIFY_ERROR);
+            redirect(
+                $viewurl,
+                get_string('notopen', 'optiksinav'),
+                null,
+                \core\output\notification::NOTIFY_ERROR
+            );
         }
         if ($instance->questioncount < 1) {
-            redirect($viewurl, get_string('noquestionsyet', 'optiksinav'), null,
-                \core\output\notification::NOTIFY_ERROR);
+            redirect(
+                $viewurl,
+                get_string('noquestionsyet', 'optiksinav'),
+                null,
+                \core\output\notification::NOTIFY_ERROR
+            );
         }
         $attempt = optiksinav_start_attempt($instance, $USER->id);
     }
@@ -72,8 +92,12 @@ if ($attempt->state === OPTIKSINAV_STATE_FINISHED) {
 // Süresi geçmiş in-progress deneme: sunucu otomatik teslim alır.
 if (optiksinav_attempt_overdue($attempt)) {
     optiksinav_grade_attempt($attempt, $instance);
-    redirect($reviewurl, get_string('timeexpired', 'optiksinav'), null,
-        \core\output\notification::NOTIFY_INFO);
+    redirect(
+        $reviewurl,
+        get_string('timeexpired', 'optiksinav'),
+        null,
+        \core\output\notification::NOTIFY_INFO
+    );
 }
 
 // --- Devam eden denemeyi göster ---
@@ -100,13 +124,15 @@ echo html_writer::start_div('optiksinav-attempt row');
 echo html_writer::start_div('col-xl-8 mb-3');
 if ($examurl) {
     echo html_writer::tag('iframe', '', [
-        'src' => $examurl->out(false).'#toolbar=0&navpanes=0',
+        'src' => $examurl->out(false) . '#toolbar=0&navpanes=0',
         'style' => 'width:100%;height:80vh;border:1px solid #ccc;',
         'title' => get_string('exampdf', 'optiksinav'),
     ]);
 } else {
-    echo $OUTPUT->notification(get_string('noexampdf', 'optiksinav'),
-        \core\output\notification::NOTIFY_WARNING);
+    echo $OUTPUT->notification(
+        get_string('noexampdf', 'optiksinav'),
+        \core\output\notification::NOTIFY_WARNING
+    );
 }
 echo html_writer::end_div();
 
@@ -114,9 +140,15 @@ echo html_writer::end_div();
 echo html_writer::start_div('col-xl-4');
 
 if ($attempt->timedue > 0) {
-    echo html_writer::div('', 'optiksinav-timer alert alert-info text-center fw-bold',
+    echo html_writer::div(
+        '',
+        'optiksinav-timer alert alert-info text-center fw-bold',
         ['id' => 'optiksinav-timer', 'role' => 'timer', 'aria-live' => 'off',
-         'aria-label' => get_string('timeremaining', 'optiksinav')]);
+        'aria-label' => get_string(
+            'timeremaining',
+            'optiksinav'
+        )]
+    );
 }
 
 $answeredinit = 0;
@@ -126,12 +158,17 @@ foreach ($saved as $a) {
     }
 }
 echo html_writer::start_div('mb-2', ['aria-live' => 'polite', 'aria-atomic' => 'true']);
-echo html_writer::tag('span', get_string('answeredcount', 'optiksinav', $answeredinit),
-    ['class' => 'badge bg-primary', 'id' => 'optiksinav-answered']);
+echo html_writer::tag(
+    'span',
+    get_string('answeredcount', 'optiksinav', $answeredinit),
+    ['class' => 'badge bg-primary', 'id' => 'optiksinav-answered']
+);
 echo ' ';
-echo html_writer::tag('span',
+echo html_writer::tag(
+    'span',
     get_string('blankcount2', 'optiksinav', $instance->questioncount - $answeredinit),
-    ['class' => 'badge bg-secondary', 'id' => 'optiksinav-blank']);
+    ['class' => 'badge bg-secondary', 'id' => 'optiksinav-blank']
+);
 echo html_writer::end_div();
 
 // Form (gerçek teslim submit.php'ye).
@@ -148,11 +185,15 @@ echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', '
 echo html_writer::start_div('optiksinav-sheet', ['style' => 'max-height:70vh;overflow-y:auto;']);
 for ($slot = 1; $slot <= $instance->questioncount; $slot++) {
     // Her soru bir fieldset/legend — ekran okuyucular için gruplanmış radyo seti.
-    echo html_writer::start_tag('fieldset',
-        ['class' => 'optiksinav-q d-flex align-items-center mb-2 border-0 p-0', 'data-slot' => $slot]);
-    echo html_writer::tag('legend',
+    echo html_writer::start_tag(
+        'fieldset',
+        ['class' => 'optiksinav-q d-flex align-items-center mb-2 border-0 p-0', 'data-slot' => $slot]
+    );
+    echo html_writer::tag(
+        'legend',
         get_string('answerkey_question', 'optiksinav', $slot),
-        ['class' => 'me-2 fw-bold float-none w-auto fs-6', 'style' => 'min-width:3.5em;']);
+        ['class' => 'me-2 fw-bold float-none w-auto fs-6', 'style' => 'min-width:3.5em;']
+    );
     foreach ($letters as $letter) {
         $inputid = "q{$slot}_{$letter}";
         $checked = (isset($saved[$slot]) && $saved[$slot] === $letter) ? ['checked' => 'checked'] : [];
@@ -164,21 +205,32 @@ for ($slot = 1; $slot <= $instance->questioncount; $slot++) {
             'id' => $inputid,
             'value' => $letter,
             'data-slot' => $slot,
-            'aria-label' => get_string('answerkey_question', 'optiksinav', $slot).' '.$letter,
+            'aria-label' => get_string('answerkey_question', 'optiksinav', $slot) . ' ' . $letter,
         ], $checked));
         echo html_writer::tag('label', $letter, ['class' => 'form-check-label', 'for' => $inputid]);
         echo html_writer::end_div();
     }
     // Klavyeyle erişilebilir "temizle" (çift tıklamanın klavye karşılığı).
-    echo html_writer::tag('button', get_string('clear'),
+    echo html_writer::tag(
+        'button',
+        get_string('clear'),
         ['type' => 'button', 'class' => 'btn btn-sm btn-link optiksinav-clear',
-         'data-slot' => $slot, 'aria-label' => get_string('clearanswer', 'optiksinav', $slot)]);
+        'data-slot' => $slot,
+        'aria-label' => get_string(
+            'clearanswer',
+            'optiksinav',
+            $slot
+        )]
+    );
     echo html_writer::end_tag('fieldset');
 }
 echo html_writer::end_div(); // sheet.
 
-echo html_writer::tag('button', get_string('finishattempt', 'optiksinav'),
-    ['type' => 'submit', 'class' => 'btn btn-primary mt-3 w-100', 'id' => 'optiksinav-submit']);
+echo html_writer::tag(
+    'button',
+    get_string('finishattempt', 'optiksinav'),
+    ['type' => 'submit', 'class' => 'btn btn-primary mt-3 w-100', 'id' => 'optiksinav-submit']
+);
 echo html_writer::end_tag('form');
 echo html_writer::end_div(); // col.
 echo html_writer::end_div(); // row.
@@ -200,6 +252,6 @@ $jsconfig = [
     'stranswered' => get_string('answeredcount', 'optiksinav', '__N__'),
     'strblank' => get_string('blankcount2', 'optiksinav', '__N__'),
 ];
-echo html_writer::script('window.OPTIKSINAV_CONFIG = '.json_encode($jsconfig).';');
+echo html_writer::script('window.OPTIKSINAV_CONFIG = ' . json_encode($jsconfig) . ';');
 
 echo $OUTPUT->footer();

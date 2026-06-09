@@ -5,6 +5,14 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Prints the main view of an Optical exam activity.
@@ -14,8 +22,8 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require(__DIR__.'/../../config.php');
-require_once(__DIR__.'/locallib.php');
+require(__DIR__ . '/../../config.php');
+require_once(__DIR__ . '/locallib.php');
 
 $id = optional_param('id', 0, PARAM_INT); // Course module id.
 $o  = optional_param('o', 0, PARAM_INT);  // ... or optiksinav instance id.
@@ -86,8 +94,12 @@ if ($canmanage) {
     $checklist .= optiksinav_checklist_item($hasanswerpdf, get_string('status_answerpdf', 'optiksinav'));
     $checklist .= optiksinav_checklist_item(
         $moduleinstance->questioncount > 0 && $keyfilled >= $moduleinstance->questioncount,
-        get_string('status_answerkey', 'optiksinav',
-            ['filled' => $keyfilled, 'total' => $moduleinstance->questioncount]));
+        get_string(
+            'status_answerkey',
+            'optiksinav',
+            ['filled' => $keyfilled, 'total' => $moduleinstance->questioncount]
+        )
+    );
     $checklist .= html_writer::end_tag('ul');
     echo html_writer::div($checklist, 'box generalbox');
 
@@ -100,12 +112,18 @@ if ($canmanage) {
 
     // Yüklü PDF'leri öğretmenin önizlemesi için bağlantılar.
     if ($examurl = optiksinav_get_file_url($context, OPTIKSINAV_FILEAREA_EXAM)) {
-        echo html_writer::div(html_writer::link($examurl, get_string('preview_exampdf', 'optiksinav'),
-            ['target' => '_blank']));
+        echo html_writer::div(html_writer::link(
+            $examurl,
+            get_string('preview_exampdf', 'optiksinav'),
+            ['target' => '_blank']
+        ));
     }
     if ($answerurl = optiksinav_get_file_url($context, OPTIKSINAV_FILEAREA_ANSWER)) {
-        echo html_writer::div(html_writer::link($answerurl, get_string('preview_answerpdf', 'optiksinav'),
-            ['target' => '_blank']));
+        echo html_writer::div(html_writer::link(
+            $answerurl,
+            get_string('preview_answerpdf', 'optiksinav'),
+            ['target' => '_blank']
+        ));
     }
 } else if (has_capability('mod/optiksinav:attempt', $context)) {
     // --- Öğrenci görünümü: başlat / devam et / sonuç ---
@@ -114,21 +132,29 @@ if ($canmanage) {
     $reviewurl = new moodle_url('/mod/optiksinav/review.php', ['id' => $cm->id]);
 
     if ($attempt && $attempt->state === OPTIKSINAV_STATE_FINISHED) {
-        echo $OUTPUT->notification(get_string('alreadyfinished', 'optiksinav'),
-            \core\output\notification::NOTIFY_INFO);
+        echo $OUTPUT->notification(
+            get_string('alreadyfinished', 'optiksinav'),
+            \core\output\notification::NOTIFY_INFO
+        );
         echo $OUTPUT->single_button($reviewurl, get_string('viewresult', 'optiksinav'), 'get');
     } else if ($attempt && $attempt->state === OPTIKSINAV_STATE_INPROGRESS) {
         echo $OUTPUT->single_button($attempturl, get_string('resumeattempt', 'optiksinav'), 'get');
     } else if (!optiksinav_is_open($moduleinstance)) {
-        echo $OUTPUT->notification(get_string('notopen', 'optiksinav'),
-            \core\output\notification::NOTIFY_WARNING);
+        echo $OUTPUT->notification(
+            get_string('notopen', 'optiksinav'),
+            \core\output\notification::NOTIFY_WARNING
+        );
     } else if ($moduleinstance->questioncount < 1 || !$hasexampdf) {
-        echo $OUTPUT->notification(get_string('notready', 'optiksinav'),
-            \core\output\notification::NOTIFY_WARNING);
+        echo $OUTPUT->notification(
+            get_string('notready', 'optiksinav'),
+            \core\output\notification::NOTIFY_WARNING
+        );
     } else {
         // Yeni deneme başlat (POST + sesskey).
-        $starturl = new moodle_url('/mod/optiksinav/attempt.php',
-            ['id' => $cm->id, 'action' => 'start']);
+        $starturl = new moodle_url(
+            '/mod/optiksinav/attempt.php',
+            ['id' => $cm->id, 'action' => 'start']
+        );
         echo $OUTPUT->single_button($starturl, get_string('startattempt', 'optiksinav'), 'post');
     }
 }
@@ -146,5 +172,5 @@ function optiksinav_checklist_item(bool $ok, string $label): string {
     $icon = $ok
         ? html_writer::tag('span', '✓ ', ['style' => 'color:green;font-weight:bold'])
         : html_writer::tag('span', '✗ ', ['style' => 'color:#cc0000;font-weight:bold']);
-    return html_writer::tag('li', $icon.$label);
+    return html_writer::tag('li', $icon . $label);
 }

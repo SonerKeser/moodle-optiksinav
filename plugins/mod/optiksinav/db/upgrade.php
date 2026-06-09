@@ -5,6 +5,14 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Database upgrade steps for mod_optiksinav.
@@ -28,7 +36,6 @@ function xmldb_optiksinav_upgrade($oldversion) {
 
     // Faz 1: cevap anahtarı + deneme + deneme-cevabı tabloları.
     if ($oldversion < 2026060901) {
-
         // optiksinav_question.
         $table = new xmldb_table('optiksinav_question');
         if (!$dbman->table_exists($table)) {
@@ -85,7 +92,6 @@ function xmldb_optiksinav_upgrade($oldversion) {
 
     // Faz 5: Safe Exam Browser zorunluluğu + odak-kaybı sayacı.
     if ($oldversion < 2026060905) {
-
         $table = new xmldb_table('optiksinav');
         $field = new xmldb_field('requireseb', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'grade');
         if (!$dbman->field_exists($table, $field)) {

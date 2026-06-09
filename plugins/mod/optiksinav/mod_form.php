@@ -5,6 +5,14 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * The main mod_optiksinav configuration form.
@@ -16,14 +24,13 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/course/moodleform_mod.php');
-require_once($CFG->dirroot.'/mod/optiksinav/locallib.php');
+require_once($CFG->dirroot . '/course/moodleform_mod.php');
+require_once($CFG->dirroot . '/mod/optiksinav/locallib.php');
 
 /**
  * Activity settings form shown when adding/editing an Optical exam.
  */
 class mod_optiksinav_mod_form extends moodleform_mod {
-
     /**
      * File manager options shared by both PDF upload areas: a single PDF, no subfolders.
      *
@@ -53,15 +60,27 @@ class mod_optiksinav_mod_form extends moodleform_mod {
         // --- Sınav ayarları ---
         $mform->addElement('header', 'examsettings', get_string('modulename', 'optiksinav'));
 
-        $mform->addElement('duration', 'timelimit', get_string('timelimit', 'optiksinav'),
-            ['optional' => true]);
+        $mform->addElement(
+            'duration',
+            'timelimit',
+            get_string('timelimit', 'optiksinav'),
+            ['optional' => true]
+        );
         $mform->setDefault('timelimit', 0);
         $mform->addHelpButton('timelimit', 'timelimit', 'optiksinav');
 
-        $mform->addElement('date_time_selector', 'timeopen', get_string('timeopen', 'optiksinav'),
-            ['optional' => true]);
-        $mform->addElement('date_time_selector', 'timeclose', get_string('timeclose', 'optiksinav'),
-            ['optional' => true]);
+        $mform->addElement(
+            'date_time_selector',
+            'timeopen',
+            get_string('timeopen', 'optiksinav'),
+            ['optional' => true]
+        );
+        $mform->addElement(
+            'date_time_selector',
+            'timeclose',
+            get_string('timeclose', 'optiksinav'),
+            ['optional' => true]
+        );
 
         $mform->addElement('text', 'questioncount', get_string('questioncount', 'optiksinav'), ['size' => '5']);
         $mform->setType('questioncount', PARAM_INT);
@@ -80,19 +99,33 @@ class mod_optiksinav_mod_form extends moodleform_mod {
         // --- PDF kitapçıkları (Moodle File API) ---
         $mform->addElement('header', 'pdfsettings', get_string('pdfheader', 'optiksinav'));
 
-        $mform->addElement('filemanager', 'exampdf', get_string('exampdf', 'optiksinav'), null,
-            $this->pdf_filemanager_options());
+        $mform->addElement(
+            'filemanager',
+            'exampdf',
+            get_string('exampdf', 'optiksinav'),
+            null,
+            $this->pdf_filemanager_options()
+        );
         $mform->addHelpButton('exampdf', 'exampdf', 'optiksinav');
 
-        $mform->addElement('filemanager', 'answerpdf', get_string('answerpdf', 'optiksinav'), null,
-            $this->pdf_filemanager_options());
+        $mform->addElement(
+            'filemanager',
+            'answerpdf',
+            get_string('answerpdf', 'optiksinav'),
+            null,
+            $this->pdf_filemanager_options()
+        );
         $mform->addHelpButton('answerpdf', 'answerpdf', 'optiksinav');
 
         // --- Güvenlik ---
         $mform->addElement('header', 'securityheader', get_string('securityheader', 'optiksinav'));
 
-        $mform->addElement('advcheckbox', 'requireseb', get_string('requireseb', 'optiksinav'),
-            get_string('requireseb_label', 'optiksinav'));
+        $mform->addElement(
+            'advcheckbox',
+            'requireseb',
+            get_string('requireseb', 'optiksinav'),
+            get_string('requireseb_label', 'optiksinav')
+        );
         $mform->setDefault('requireseb', 0);
         $mform->addHelpButton('requireseb', 'requireseb', 'optiksinav');
 
@@ -112,13 +145,25 @@ class mod_optiksinav_mod_form extends moodleform_mod {
         $options = $this->pdf_filemanager_options();
 
         $examdraft = file_get_submitted_draft_itemid('exampdf');
-        file_prepare_draft_area($examdraft, $this->context->id, 'mod_optiksinav',
-            OPTIKSINAV_FILEAREA_EXAM, OPTIKSINAV_FILE_ITEMID, $options);
+        file_prepare_draft_area(
+            $examdraft,
+            $this->context->id,
+            'mod_optiksinav',
+            OPTIKSINAV_FILEAREA_EXAM,
+            OPTIKSINAV_FILE_ITEMID,
+            $options
+        );
         $defaultvalues['exampdf'] = $examdraft;
 
         $answerdraft = file_get_submitted_draft_itemid('answerpdf');
-        file_prepare_draft_area($answerdraft, $this->context->id, 'mod_optiksinav',
-            OPTIKSINAV_FILEAREA_ANSWER, OPTIKSINAV_FILE_ITEMID, $options);
+        file_prepare_draft_area(
+            $answerdraft,
+            $this->context->id,
+            'mod_optiksinav',
+            OPTIKSINAV_FILEAREA_ANSWER,
+            OPTIKSINAV_FILE_ITEMID,
+            $options
+        );
         $defaultvalues['answerpdf'] = $answerdraft;
     }
 

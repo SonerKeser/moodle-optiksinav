@@ -13,3 +13,6 @@ data/
 /vendor/
 composer.lock
 .phpunit.result.cache
+
+# Paketleme çıktıları
+/dist/

@@ -5,6 +5,14 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Lists all Optical exam instances in a course.
@@ -14,7 +22,7 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require(__DIR__.'/../../config.php');
+require(__DIR__ . '/../../config.php');
 
 $id = required_param('id', PARAM_INT); // Course id.
 
@@ -34,8 +42,10 @@ echo $OUTPUT->heading(get_string('modulenameplural', 'optiksinav'));
 $instances = get_all_instances_in_course('optiksinav', $course);
 
 if (empty($instances)) {
-    notice(get_string('noinstances', 'moodle', get_string('modulenameplural', 'optiksinav')),
-        new moodle_url('/course/view.php', ['id' => $course->id]));
+    notice(
+        get_string('noinstances', 'moodle', get_string('modulenameplural', 'optiksinav')),
+        new moodle_url('/course/view.php', ['id' => $course->id])
+    );
 }
 
 $table = new html_table();
@@ -44,8 +54,11 @@ $table->data = [];
 
 foreach ($instances as $instance) {
     $link = new moodle_url('/mod/optiksinav/view.php', ['id' => $instance->coursemodule]);
-    $name = html_writer::link($link, format_string($instance->name),
-        $instance->visible ? [] : ['class' => 'dimmed']);
+    $name = html_writer::link(
+        $link,
+        format_string($instance->name),
+        $instance->visible ? [] : ['class' => 'dimmed']
+    );
     $table->data[] = [$name, $instance->questioncount];
 }
 

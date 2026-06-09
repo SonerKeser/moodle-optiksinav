@@ -5,6 +5,14 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Library of interface functions and constants for mod_optiksinav.
@@ -125,7 +133,7 @@ function optiksinav_delete_instance($id) {
  * @return void
  */
 function optiksinav_save_pdf_files(stdClass $data): void {
-    require_once(__DIR__.'/locallib.php');
+    require_once(__DIR__ . '/locallib.php');
 
     if (empty($data->coursemodule)) {
         return;
@@ -134,12 +142,24 @@ function optiksinav_save_pdf_files(stdClass $data): void {
     $options = ['subdirs' => 0, 'maxfiles' => 1, 'accepted_types' => ['.pdf']];
 
     if (isset($data->exampdf)) {
-        file_save_draft_area_files($data->exampdf, $context->id, 'mod_optiksinav',
-            OPTIKSINAV_FILEAREA_EXAM, OPTIKSINAV_FILE_ITEMID, $options);
+        file_save_draft_area_files(
+            $data->exampdf,
+            $context->id,
+            'mod_optiksinav',
+            OPTIKSINAV_FILEAREA_EXAM,
+            OPTIKSINAV_FILE_ITEMID,
+            $options
+        );
     }
     if (isset($data->answerpdf)) {
-        file_save_draft_area_files($data->answerpdf, $context->id, 'mod_optiksinav',
-            OPTIKSINAV_FILEAREA_ANSWER, OPTIKSINAV_FILE_ITEMID, $options);
+        file_save_draft_area_files(
+            $data->answerpdf,
+            $context->id,
+            'mod_optiksinav',
+            OPTIKSINAV_FILEAREA_ANSWER,
+            OPTIKSINAV_FILE_ITEMID,
+            $options
+        );
     }
 }
 
@@ -160,7 +180,7 @@ function optiksinav_save_pdf_files(stdClass $data): void {
  * @return bool False if the file was not found; otherwise serves and exits.
  */
 function optiksinav_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
-    require_once(__DIR__.'/locallib.php');
+    require_once(__DIR__ . '/locallib.php');
 
     if ($context->contextlevel != CONTEXT_MODULE) {
         return false;
@@ -192,7 +212,7 @@ function optiksinav_pluginfile($course, $cm, $context, $filearea, $args, $forced
 
     $itemid = (int)array_shift($args);
     $filename = array_pop($args);
-    $filepath = $args ? '/'.implode('/', $args).'/' : '/';
+    $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
 
     $fs = get_file_storage();
     $file = $fs->get_file($context->id, 'mod_optiksinav', $filearea, $itemid, $filepath, $filename);
@@ -214,7 +234,7 @@ function optiksinav_pluginfile($course, $cm, $context, $filearea, $args, $forced
  */
 function optiksinav_grade_item_update($instance, $grades = null) {
     global $CFG;
-    require_once($CFG->libdir.'/gradelib.php');
+    require_once($CFG->libdir . '/gradelib.php');
 
     $item = [
         'itemname' => clean_param($instance->name, PARAM_NOTAGS),
@@ -232,8 +252,16 @@ function optiksinav_grade_item_update($instance, $grades = null) {
         $grades = null;
     }
 
-    return grade_update('mod/optiksinav', $instance->course, 'mod', 'optiksinav',
-        $instance->id, 0, $grades, $item);
+    return grade_update(
+        'mod/optiksinav',
+        $instance->course,
+        'mod',
+        'optiksinav',
+        $instance->id,
+        0,
+        $grades,
+        $item
+    );
 }
 
 /**
@@ -244,10 +272,18 @@ function optiksinav_grade_item_update($instance, $grades = null) {
  */
 function optiksinav_grade_item_delete($instance) {
     global $CFG;
-    require_once($CFG->libdir.'/gradelib.php');
+    require_once($CFG->libdir . '/gradelib.php');
 
-    return grade_update('mod/optiksinav', $instance->course, 'mod', 'optiksinav',
-        $instance->id, 0, null, ['deleted' => 1]);
+    return grade_update(
+        'mod/optiksinav',
+        $instance->course,
+        'mod',
+        'optiksinav',
+        $instance->id,
+        0,
+        null,
+        ['deleted' => 1]
+    );
 }
 
 /**
@@ -289,7 +325,7 @@ function optiksinav_get_user_grades($instance, $userid = 0) {
  */
 function optiksinav_update_grades($instance, $userid = 0, $nullifnone = true) {
     global $CFG;
-    require_once($CFG->libdir.'/gradelib.php');
+    require_once($CFG->libdir . '/gradelib.php');
 
     if (!isset($instance->grade) || $instance->grade == 0) {
         optiksinav_grade_item_update($instance);

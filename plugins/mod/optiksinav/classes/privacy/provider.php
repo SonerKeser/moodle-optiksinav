@@ -5,6 +5,14 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Privacy Subsystem implementation for mod_optiksinav.
@@ -17,6 +25,7 @@
 namespace mod_optiksinav\privacy;
 
 use core_privacy\local\metadata\collection;
+use core_privacy\local\request\transform;
 use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\approved_userlist;
 use core_privacy\local\request\contextlist;
@@ -30,10 +39,9 @@ defined('MOODLE_INTERNAL') || die();
  * Privacy provider: the plugin stores per-user exam attempts and answers.
  */
 class provider implements
-        \core_privacy\local\metadata\provider,
-        \core_privacy\local\request\plugin\provider,
-        \core_privacy\local\request\core_userlist_provider {
-
+    \core_privacy\local\metadata\provider,
+    \core_privacy\local\request\core_userlist_provider,
+    \core_privacy\local\request\plugin\provider {
     /**
      * Describe the user data stored by this plugin.
      *
@@ -128,27 +136,34 @@ class provider implements
                 continue;
             }
 
-            $attempts = $DB->get_records('optiksinav_attempt',
-                ['optiksinavid' => $cm->instance, 'userid' => $user->id], 'attemptnumber ASC');
+            $attempts = $DB->get_records(
+                'optiksinav_attempt',
+                ['optiksinavid' => $cm->instance, 'userid' => $user->id],
+                'attemptnumber ASC'
+            );
             if (!$attempts) {
                 continue;
             }
 
             $data = (object)['attempts' => []];
             foreach ($attempts as $attempt) {
-                $answers = $DB->get_records('optiksinav_attempt_answer',
-                    ['attemptid' => $attempt->id], 'slot ASC', 'slot, answer');
+                $answers = $DB->get_records(
+                    'optiksinav_attempt_answer',
+                    ['attemptid' => $attempt->id],
+                    'slot ASC',
+                    'slot, answer'
+                );
                 $data->attempts[] = [
                     'attemptnumber' => $attempt->attemptnumber,
                     'state' => $attempt->state,
-                    'timestart' => $attempt->timestart ? \core_privacy\local\request\transform::datetime($attempt->timestart) : null,
-                    'timefinish' => $attempt->timefinish ? \core_privacy\local\request\transform::datetime($attempt->timefinish) : null,
+                    'timestart' => $attempt->timestart ? transform::datetime($attempt->timestart) : null,
+                    'timefinish' => $attempt->timefinish ? transform::datetime($attempt->timefinish) : null,
                     'correctcount' => $attempt->correctcount,
                     'wrongcount' => $attempt->wrongcount,
                     'blankcount' => $attempt->blankcount,
                     'net' => $attempt->net,
                     'grade' => $attempt->grade,
-                    'answers' => array_map(function($a) {
+                    'answers' => array_map(function ($a) {
                         return ['slot' => $a->slot, 'answer' => $a->answer];
                     }, array_values($answers)),
                 ];
@@ -173,8 +188,12 @@ class provider implements
         if (!$cm) {
             return;
         }
-        self::delete_attempts_where($DB->get_fieldset_select('optiksinav_attempt', 'id',
-            'optiksinavid = ?', [$cm->instance]));
+        self::delete_attempts_where($DB->get_fieldset_select(
+            'optiksinav_attempt',
+            'id',
+            'optiksinavid = ?',
+            [$cm->instance]
+        ));
     }
 
     /**
@@ -193,8 +212,12 @@ class provider implements
             if (!$cm) {
                 continue;
             }
-            self::delete_attempts_where($DB->get_fieldset_select('optiksinav_attempt', 'id',
-                'optiksinavid = ? AND userid = ?', [$cm->instance, $userid]));
+            self::delete_attempts_where($DB->get_fieldset_select(
+                'optiksinav_attempt',
+                'id',
+                'optiksinavid = ? AND userid = ?',
+                [$cm->instance, $userid]
+            ));
         }
     }
 
@@ -217,10 +240,14 @@ class provider implements
         if (!$userids) {
             return;
         }
-        list($insql, $params) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+        [$insql, $params] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
         $params['oid'] = $cm->instance;
-        $attemptids = $DB->get_fieldset_select('optiksinav_attempt', 'id',
-            "optiksinavid = :oid AND userid $insql", $params);
+        $attemptids = $DB->get_fieldset_select(
+            'optiksinav_attempt',
+            'id',
+            "optiksinavid = :oid AND userid $insql",
+            $params
+        );
         self::delete_attempts_where($attemptids);
     }
 

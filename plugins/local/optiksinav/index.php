@@ -5,6 +5,14 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Site-wide exam centre: every OptikSınav activity across all courses.
@@ -14,8 +22,8 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require(__DIR__.'/../../config.php');
-require_once($CFG->libdir.'/adminlib.php');
+require(__DIR__ . '/../../config.php');
+require_once($CFG->libdir . '/adminlib.php');
 
 admin_externalpage_setup('local_optiksinav');
 
@@ -39,8 +47,10 @@ $sql = "SELECT o.id, o.name, o.questioncount, c.id AS courseid, c.fullname, cm.i
 $records = $DB->get_records_sql($sql, ['finished' => 'finished', 'finished2' => 'finished']);
 
 if (!$records) {
-    echo $OUTPUT->notification(get_string('noexams', 'local_optiksinav'),
-        \core\output\notification::NOTIFY_INFO);
+    echo $OUTPUT->notification(
+        get_string('noexams', 'local_optiksinav'),
+        \core\output\notification::NOTIFY_INFO
+    );
     echo $OUTPUT->footer();
     die();
 }
@@ -61,7 +71,7 @@ foreach ($records as $r) {
     $viewurl = new moodle_url('/mod/optiksinav/view.php', ['id' => $r->cmid]);
     $reporturl = new moodle_url('/mod/optiksinav/report.php', ['id' => $r->cmid]);
 
-    $actions = html_writer::link($viewurl, get_string('view')).' · '.
+    $actions = html_writer::link($viewurl, get_string('view')) . ' · ' .
         html_writer::link($reporturl, get_string('report', 'optiksinav'));
 
     $table->data[] = [

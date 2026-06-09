@@ -5,6 +5,14 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Answer-key editor page for a single Optical exam (teacher-facing).
@@ -14,8 +22,8 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require(__DIR__.'/../../config.php');
-require_once(__DIR__.'/locallib.php');
+require(__DIR__ . '/../../config.php');
+require_once(__DIR__ . '/locallib.php');
 
 use mod_optiksinav\form\answerkey_form;
 
@@ -50,8 +58,12 @@ if ($mform->is_cancelled()) {
 if ($data = $mform->get_data()) {
     $answers = isset($data->answer) && is_array($data->answer) ? $data->answer : [];
     optiksinav_save_answer_key($moduleinstance->id, $moduleinstance->questioncount, $answers);
-    redirect($viewurl, get_string('answerkey_saved', 'optiksinav'), null,
-        \core\output\notification::NOTIFY_SUCCESS);
+    redirect(
+        $viewurl,
+        get_string('answerkey_saved', 'optiksinav'),
+        null,
+        \core\output\notification::NOTIFY_SUCCESS
+    );
 }
 
 // Mevcut cevap anahtarını forma yükle.
@@ -59,6 +71,6 @@ $existing = optiksinav_get_answer_key($moduleinstance->id);
 $mform->set_data(['answer' => $existing]);
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('answerkey', 'optiksinav').': '.format_string($moduleinstance->name));
+echo $OUTPUT->heading(get_string('answerkey', 'optiksinav') . ': ' . format_string($moduleinstance->name));
 $mform->display();
 echo $OUTPUT->footer();

@@ -5,6 +5,14 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Finalises (grades) an in-progress attempt and redirects to the review page.
@@ -14,8 +22,8 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require(__DIR__.'/../../config.php');
-require_once(__DIR__.'/locallib.php');
+require(__DIR__ . '/../../config.php');
+require_once(__DIR__ . '/locallib.php');
 
 $id = required_param('id', PARAM_INT);             // Course module id.
 $attemptid = required_param('attemptid', PARAM_INT);
@@ -40,8 +48,12 @@ if ((int)$attempt->userid !== (int)$USER->id || (int)$attempt->optiksinavid !== 
 
 // Safe Exam Browser zorunluysa ve sağlanmıyorsa teslim alma.
 if (!optiksinav_seb_satisfied($instance)) {
-    redirect($reviewurl, get_string('sebrequired', 'optiksinav'), null,
-        \core\output\notification::NOTIFY_ERROR);
+    redirect(
+        $reviewurl,
+        get_string('sebrequired', 'optiksinav'),
+        null,
+        \core\output\notification::NOTIFY_ERROR
+    );
 }
 
 // Zaten bitmişse tekrar puanlama.
@@ -49,5 +61,9 @@ if ($attempt->state === OPTIKSINAV_STATE_INPROGRESS) {
     optiksinav_grade_attempt($attempt, $instance);
 }
 
-redirect($reviewurl, get_string('attemptsubmitted', 'optiksinav'), null,
-    \core\output\notification::NOTIFY_SUCCESS);
+redirect(
+    $reviewurl,
+    get_string('attemptsubmitted', 'optiksinav'),
+    null,
+    \core\output\notification::NOTIFY_SUCCESS
+);

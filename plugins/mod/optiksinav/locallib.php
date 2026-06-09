@@ -5,6 +5,14 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Internal helper library for mod_optiksinav (loaded only where needed).
@@ -60,8 +68,12 @@ function optiksinav_get_option_letters(int $optioncount): array {
  */
 function optiksinav_get_answer_key(int $optiksinavid): array {
     global $DB;
-    $records = $DB->get_records('optiksinav_question', ['optiksinavid' => $optiksinavid], 'slot ASC',
-        'slot, correctanswer');
+    $records = $DB->get_records(
+        'optiksinav_question',
+        ['optiksinavid' => $optiksinavid],
+        'slot ASC',
+        'slot, correctanswer'
+    );
     $key = [];
     foreach ($records as $record) {
         $key[(int)$record->slot] = $record->correctanswer;
@@ -88,8 +100,12 @@ function optiksinav_save_answer_key(int $optiksinavid, int $questioncount, array
     for ($slot = 1; $slot <= $questioncount; $slot++) {
         $answer = isset($answers[$slot]) && $answers[$slot] !== '' ? strtoupper($answers[$slot]) : null;
         if (isset($existing[$slot])) {
-            $DB->set_field('optiksinav_question', 'correctanswer', $answer,
-                ['id' => $existing[$slot]->id]);
+            $DB->set_field(
+                'optiksinav_question',
+                'correctanswer',
+                $answer,
+                ['id' => $existing[$slot]->id]
+            );
             unset($existing[$slot]);
         } else {
             $DB->insert_record('optiksinav_question', (object)[
@@ -116,8 +132,14 @@ function optiksinav_save_answer_key(int $optiksinavid, int $questioncount, array
  */
 function optiksinav_has_file(context_module $context, string $filearea): bool {
     $fs = get_file_storage();
-    return $fs->get_area_files($context->id, 'mod_optiksinav', $filearea, OPTIKSINAV_FILE_ITEMID,
-        'itemid, filepath, filename', false) ? true : false;
+    return $fs->get_area_files(
+        $context->id,
+        'mod_optiksinav',
+        $filearea,
+        OPTIKSINAV_FILE_ITEMID,
+        'itemid, filepath, filename',
+        false
+    ) ? true : false;
 }
 
 /**
@@ -129,14 +151,26 @@ function optiksinav_has_file(context_module $context, string $filearea): bool {
  */
 function optiksinav_get_file_url(context_module $context, string $filearea): ?moodle_url {
     $fs = get_file_storage();
-    $files = $fs->get_area_files($context->id, 'mod_optiksinav', $filearea, OPTIKSINAV_FILE_ITEMID,
-        'itemid, filepath, filename', false);
+    $files = $fs->get_area_files(
+        $context->id,
+        'mod_optiksinav',
+        $filearea,
+        OPTIKSINAV_FILE_ITEMID,
+        'itemid, filepath, filename',
+        false
+    );
     if (!$files) {
         return null;
     }
     $file = reset($files);
-    return moodle_url::make_pluginfile_url($context->id, 'mod_optiksinav', $filearea,
-        OPTIKSINAV_FILE_ITEMID, $file->get_filepath(), $file->get_filename());
+    return moodle_url::make_pluginfile_url(
+        $context->id,
+        'mod_optiksinav',
+        $filearea,
+        OPTIKSINAV_FILE_ITEMID,
+        $file->get_filepath(),
+        $file->get_filename()
+    );
 }
 
 /**
@@ -147,9 +181,11 @@ function optiksinav_get_file_url(context_module $context, string $filearea): ?mo
  */
 function optiksinav_answer_key_filled_count(int $optiksinavid): int {
     global $DB;
-    return $DB->count_records_select('optiksinav_question',
+    return $DB->count_records_select(
+        'optiksinav_question',
         'optiksinavid = :id AND correctanswer IS NOT NULL AND correctanswer <> :empty',
-        ['id' => $optiksinavid, 'empty' => '']);
+        ['id' => $optiksinavid, 'empty' => '']
+    );
 }
 
 /**
@@ -181,8 +217,14 @@ function optiksinav_effective_deadline(stdClass $instance, int $timestart): int 
  */
 function optiksinav_get_user_attempt(int $optiksinavid, int $userid): ?stdClass {
     global $DB;
-    $records = $DB->get_records('optiksinav_attempt',
-        ['optiksinavid' => $optiksinavid, 'userid' => $userid], 'attemptnumber DESC', '*', 0, 1);
+    $records = $DB->get_records(
+        'optiksinav_attempt',
+        ['optiksinavid' => $optiksinavid, 'userid' => $userid],
+        'attemptnumber DESC',
+        '*',
+        0,
+        1
+    );
     return $records ? reset($records) : null;
 }
 
@@ -227,8 +269,10 @@ function optiksinav_start_attempt(stdClass $instance, int $userid): stdClass {
     global $DB;
     $now = time();
 
-    $previous = $DB->count_records('optiksinav_attempt',
-        ['optiksinavid' => $instance->id, 'userid' => $userid]);
+    $previous = $DB->count_records(
+        'optiksinav_attempt',
+        ['optiksinavid' => $instance->id, 'userid' => $userid]
+    );
 
     $attempt = (object)[
         'optiksinavid' => $instance->id,
@@ -257,8 +301,12 @@ function optiksinav_start_attempt(stdClass $instance, int $userid): stdClass {
  */
 function optiksinav_get_attempt_answers(int $attemptid): array {
     global $DB;
-    $records = $DB->get_records('optiksinav_attempt_answer', ['attemptid' => $attemptid], 'slot ASC',
-        'slot, answer');
+    $records = $DB->get_records(
+        'optiksinav_attempt_answer',
+        ['attemptid' => $attemptid],
+        'slot ASC',
+        'slot, answer'
+    );
     $answers = [];
     foreach ($records as $record) {
         $answers[(int)$record->slot] = $record->answer;
@@ -278,8 +326,10 @@ function optiksinav_save_attempt_answer(int $attemptid, int $slot, ?string $answ
     global $DB;
     $answer = ($answer === null || $answer === '') ? null : strtoupper($answer);
 
-    $existing = $DB->get_record('optiksinav_attempt_answer',
-        ['attemptid' => $attemptid, 'slot' => $slot]);
+    $existing = $DB->get_record(
+        'optiksinav_attempt_answer',
+        ['attemptid' => $attemptid, 'slot' => $slot]
+    );
     if ($existing) {
         $DB->set_field('optiksinav_attempt_answer', 'answer', $answer, ['id' => $existing->id]);
     } else {
@@ -344,7 +394,7 @@ function optiksinav_grade_attempt(stdClass $attempt, stdClass $instance): stdCla
     $DB->update_record('optiksinav_attempt', $attempt);
 
     // Net puanı Moodle not defterine işle.
-    require_once(__DIR__.'/lib.php');
+    require_once(__DIR__ . '/lib.php');
     optiksinav_update_grades($instance, $attempt->userid);
 
     return $attempt;
@@ -379,6 +429,8 @@ function optiksinav_seb_satisfied(stdClass $instance): bool {
  */
 function optiksinav_increment_focusloss(int $attemptid): void {
     global $DB;
-    $DB->execute('UPDATE {optiksinav_attempt} SET focuslosscount = focuslosscount + 1 WHERE id = ?',
-        [$attemptid]);
+    $DB->execute(
+        'UPDATE {optiksinav_attempt} SET focuslosscount = focuslosscount + 1 WHERE id = ?',
+        [$attemptid]
+    );
 }

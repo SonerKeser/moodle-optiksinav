@@ -5,6 +5,14 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Scheduled task: auto-submit attempts whose deadline has passed.
@@ -21,8 +29,9 @@ namespace mod_optiksinav\task;
  * so a score is recorded even if the student never returns to the page.
  */
 class close_overdue_attempts extends \core\task\scheduled_task {
-
     /**
+     * Return the human-readable name of this scheduled task.
+     *
      * @return string The visible name of this task.
      */
     public function get_name() {
@@ -34,12 +43,14 @@ class close_overdue_attempts extends \core\task\scheduled_task {
      */
     public function execute() {
         global $DB, $CFG;
-        require_once($CFG->dirroot.'/mod/optiksinav/locallib.php');
+        require_once($CFG->dirroot . '/mod/optiksinav/locallib.php');
 
         $now = time();
-        $rs = $DB->get_recordset_select('optiksinav_attempt',
+        $rs = $DB->get_recordset_select(
+            'optiksinav_attempt',
             "state = :state AND timedue > 0 AND timedue < :now",
-            ['state' => OPTIKSINAV_STATE_INPROGRESS, 'now' => $now]);
+            ['state' => OPTIKSINAV_STATE_INPROGRESS, 'now' => $now]
+        );
 
         $closed = 0;
         $instances = [];

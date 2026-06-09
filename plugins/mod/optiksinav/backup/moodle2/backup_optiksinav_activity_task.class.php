@@ -5,6 +5,14 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Backup activity task for mod_optiksinav.
@@ -16,13 +24,12 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/mod/optiksinav/backup/moodle2/backup_optiksinav_stepslib.php');
+require_once($CFG->dirroot . '/mod/optiksinav/backup/moodle2/backup_optiksinav_stepslib.php');
 
 /**
  * Backup task that provides the settings and steps to back up an optiksinav activity.
  */
 class backup_optiksinav_activity_task extends backup_activity_task {
-
     /**
      * No activity-specific settings.
      */
@@ -47,11 +54,11 @@ class backup_optiksinav_activity_task extends backup_activity_task {
         $base = preg_quote($CFG->wwwroot, '/');
 
         // /mod/optiksinav/view.php?id=...
-        $search = '/('.$base.'\/mod\/optiksinav\/view\.php\?id=)([0-9]+)/';
+        $search = '/(' . $base . '\/mod\/optiksinav\/view\.php\?id=)([0-9]+)/';
         $content = preg_replace($search, '$@OPTIKSINAVVIEWBYID*$2@$', $content);
 
         // /mod/optiksinav/index.php?id=...
-        $search = '/('.$base.'\/mod\/optiksinav\/index\.php\?id=)([0-9]+)/';
+        $search = '/(' . $base . '\/mod\/optiksinav\/index\.php\?id=)([0-9]+)/';
         $content = preg_replace($search, '$@OPTIKSINAVINDEX*$2@$', $content);
 
         return $content;

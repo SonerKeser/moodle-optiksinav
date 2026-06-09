@@ -5,6 +5,14 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Teacher report: all student attempts for one exam, with CSV export.
@@ -14,8 +22,8 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require(__DIR__.'/../../config.php');
-require_once(__DIR__.'/locallib.php');
+require(__DIR__ . '/../../config.php');
+require_once(__DIR__ . '/locallib.php');
 
 $id = required_param('id', PARAM_INT);                  // Course module id.
 $download = optional_param('download', '', PARAM_ALPHA); // '' or 'csv'.
@@ -56,7 +64,7 @@ foreach ($rows as $r) {
         ? format_time($r->timefinish - $r->timestart) : '';
     $data[] = (object)[
         'student' => fullname($r),
-        'state' => get_string('state_'.$r->state, 'optiksinav'),
+        'state' => get_string('state_' . $r->state, 'optiksinav'),
         'correct' => $r->correctcount,
         'wrong' => $r->wrongcount,
         'blank' => $r->blankcount,
@@ -76,10 +84,10 @@ if ($download === 'csv') {
         ob_end_clean();
     }
     \core\dataformat::download_data(
-        clean_filename('optiksinav_'.$instance->name),
+        clean_filename('optiksinav_' . $instance->name),
         'csv',
         $columns,
-        array_map(function($row) {
+        array_map(function ($row) {
             unset($row->_attemptid, $row->_state);
             return $row;
         }, $data)
@@ -93,19 +101,23 @@ $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_context($context);
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(format_string($instance->name).' — '.get_string('report', 'optiksinav'));
+echo $OUTPUT->heading(format_string($instance->name) . ' — ' . get_string('report', 'optiksinav'));
 
 if (empty($data)) {
-    echo $OUTPUT->notification(get_string('noattempts', 'optiksinav'),
-        \core\output\notification::NOTIFY_INFO);
+    echo $OUTPUT->notification(
+        get_string('noattempts', 'optiksinav'),
+        \core\output\notification::NOTIFY_INFO
+    );
     echo $OUTPUT->footer();
     die();
 }
 
 // Dışa aktar butonu.
 $csvurl = new moodle_url('/mod/optiksinav/report.php', ['id' => $cm->id, 'download' => 'csv']);
-echo html_writer::div($OUTPUT->single_button($csvurl, get_string('downloadcsv', 'optiksinav'), 'get'),
-    'mb-3');
+echo html_writer::div(
+    $OUTPUT->single_button($csvurl, get_string('downloadcsv', 'optiksinav'), 'get'),
+    'mb-3'
+);
 
 $table = new html_table();
 $table->head = array_values($columns);
@@ -115,8 +127,10 @@ foreach ($data as $row) {
     $cells = [$row->student, $row->state, $row->correct, $row->wrong, $row->blank,
         $row->net, $row->grade, $row->duration, $row->focusloss];
     if ($row->_state === OPTIKSINAV_STATE_FINISHED) {
-        $reviewurl = new moodle_url('/mod/optiksinav/review.php',
-            ['id' => $cm->id, 'attemptid' => $row->_attemptid]);
+        $reviewurl = new moodle_url(
+            '/mod/optiksinav/review.php',
+            ['id' => $cm->id, 'attemptid' => $row->_attemptid]
+        );
         $cells[] = html_writer::link($reviewurl, get_string('viewresult', 'optiksinav'));
     } else {
         $cells[] = '';

@@ -5,6 +5,14 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * AJAX endpoint: save a single answer for an in-progress attempt.
@@ -20,8 +28,8 @@
 
 define('AJAX_SCRIPT', true);
 
-require(__DIR__.'/../../config.php');
-require_once(__DIR__.'/locallib.php');
+require(__DIR__ . '/../../config.php');
+require_once(__DIR__ . '/locallib.php');
 
 $attemptid = required_param('attemptid', PARAM_INT);
 $slot = required_param('slot', PARAM_INT);
@@ -29,7 +37,7 @@ $answer = optional_param('answer', '', PARAM_ALPHA);
 
 $attempt = $DB->get_record('optiksinav_attempt', ['id' => $attemptid], '*', MUST_EXIST);
 $instance = $DB->get_record('optiksinav', ['id' => $attempt->optiksinavid], '*', MUST_EXIST);
-list($course, $cm) = get_course_and_cm_from_instance($instance->id, 'optiksinav');
+[$course, $cm] = get_course_and_cm_from_instance($instance->id, 'optiksinav');
 
 require_login($course, false, $cm);
 require_sesskey();
