@@ -102,6 +102,29 @@ $string['correctanswer'] = 'Correct answer';
 $string['outcome'] = 'Outcome';
 $string['ungraded'] = 'Not graded';
 
+// Report.
+$string['student'] = 'Student';
+$string['viewreport'] = 'View report';
+$string['downloadcsv'] = 'Download CSV';
+$string['noattempts'] = 'No attempts yet.';
+$string['state'] = 'State';
+$string['state_inprogress'] = 'In progress';
+$string['state_finished'] = 'Finished';
+$string['state_abandoned'] = 'Abandoned';
+
 // Misc.
 $string['modulename_help'] = 'The Optical exam activity presents a PDF question booklet alongside an A–E optical answer sheet, enforces the time limit on the server, computes a net score (correct − wrong × penalty) and feeds it to the gradebook.';
-$string['privacy:metadata'] = 'The Optical exam plugin stores exam attempts and answers for each user.';
+$string['privacy:metadata:optiksinav_attempt'] = 'Exam attempts made by the user.';
+$string['privacy:metadata:optiksinav_attempt:userid'] = 'The user who made the attempt.';
+$string['privacy:metadata:optiksinav_attempt:attemptnumber'] = 'The sequence number of the attempt.';
+$string['privacy:metadata:optiksinav_attempt:state'] = 'The state of the attempt (in progress / finished).';
+$string['privacy:metadata:optiksinav_attempt:timestart'] = 'When the attempt started.';
+$string['privacy:metadata:optiksinav_attempt:timefinish'] = 'When the attempt finished.';
+$string['privacy:metadata:optiksinav_attempt:correctcount'] = 'Number of correct answers.';
+$string['privacy:metadata:optiksinav_attempt:wrongcount'] = 'Number of wrong answers.';
+$string['privacy:metadata:optiksinav_attempt:blankcount'] = 'Number of blank answers.';
+$string['privacy:metadata:optiksinav_attempt:net'] = 'The net score.';
+$string['privacy:metadata:optiksinav_attempt:grade'] = 'The grade for the attempt.';
+$string['privacy:metadata:optiksinav_attempt_answer'] = 'The individual answers given in an attempt.';
+$string['privacy:metadata:optiksinav_attempt_answer:slot'] = 'The question number.';
+$string['privacy:metadata:optiksinav_attempt_answer:answer'] = 'The chosen option for the question.';

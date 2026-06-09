@@ -102,6 +102,29 @@ $string['correctanswer'] = 'Doğru cevap';
 $string['outcome'] = 'Sonuç';
 $string['ungraded'] = 'Puanlanmadı';
 
+// Rapor.
+$string['student'] = 'Öğrenci';
+$string['viewreport'] = 'Raporu gör';
+$string['downloadcsv'] = 'CSV indir';
+$string['noattempts'] = 'Henüz deneme yok.';
+$string['state'] = 'Durum';
+$string['state_inprogress'] = 'Devam ediyor';
+$string['state_finished'] = 'Tamamlandı';
+$string['state_abandoned'] = 'Terk edildi';
+
 // Genel.
 $string['modulename_help'] = 'Optik Sınav aktivitesi, bir PDF soru kitapçığını A–E optik cevap formuyla birlikte sunar; süreyi sunucu tarafında zorlar, net puanı (doğru − yanlış × ceza) hesaplar ve not defterine işler.';
-$string['privacy:metadata'] = 'Optik Sınav eklentisi her kullanıcı için sınav denemelerini ve cevaplarını saklar.';
+$string['privacy:metadata:optiksinav_attempt'] = 'Kullanıcının yaptığı sınav denemeleri.';
+$string['privacy:metadata:optiksinav_attempt:userid'] = 'Denemeyi yapan kullanıcı.';
+$string['privacy:metadata:optiksinav_attempt:attemptnumber'] = 'Deneme sıra numarası.';
+$string['privacy:metadata:optiksinav_attempt:state'] = 'Denemenin durumu (devam ediyor / tamamlandı).';
+$string['privacy:metadata:optiksinav_attempt:timestart'] = 'Denemenin başladığı an.';
+$string['privacy:metadata:optiksinav_attempt:timefinish'] = 'Denemenin bittiği an.';
+$string['privacy:metadata:optiksinav_attempt:correctcount'] = 'Doğru cevap sayısı.';
+$string['privacy:metadata:optiksinav_attempt:wrongcount'] = 'Yanlış cevap sayısı.';
+$string['privacy:metadata:optiksinav_attempt:blankcount'] = 'Boş cevap sayısı.';
+$string['privacy:metadata:optiksinav_attempt:net'] = 'Net puan.';
+$string['privacy:metadata:optiksinav_attempt:grade'] = 'Deneme notu.';
+$string['privacy:metadata:optiksinav_attempt_answer'] = 'Bir denemede verilen tekil cevaplar.';
+$string['privacy:metadata:optiksinav_attempt_answer:slot'] = 'Soru numarası.';
+$string['privacy:metadata:optiksinav_attempt_answer:answer'] = 'Soru için seçilen şık.';

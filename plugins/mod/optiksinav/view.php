@@ -92,9 +92,11 @@ if ($canmanage) {
     echo html_writer::div($checklist, 'box generalbox');
 
     $editkeyurl = new moodle_url('/mod/optiksinav/editkey.php', ['id' => $cm->id]);
-    echo html_writer::div(
-        $OUTPUT->single_button($editkeyurl, get_string('editanswerkey', 'optiksinav'), 'get'),
-        'mb-3');
+    $reporturl = new moodle_url('/mod/optiksinav/report.php', ['id' => $cm->id]);
+    echo html_writer::start_div('mb-3 d-flex gap-2');
+    echo $OUTPUT->single_button($editkeyurl, get_string('editanswerkey', 'optiksinav'), 'get');
+    echo $OUTPUT->single_button($reporturl, get_string('viewreport', 'optiksinav'), 'get');
+    echo html_writer::end_div();
 
     // Yüklü PDF'leri öğretmenin önizlemesi için bağlantılar.
     if ($examurl = optiksinav_get_file_url($context, OPTIKSINAV_FILEAREA_EXAM)) {

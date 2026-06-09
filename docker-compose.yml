@@ -52,7 +52,7 @@ services:
       # 1. aşama (temiz kurulum): aşağıdaki satırlar YORUMDA kalır.
       # 2. aşama (eklenti geliştirme): yorumu kaldır + `docker compose up -d` ile moodle'ı yeniden oluştur.
       - ./plugins/mod/optiksinav:/bitnami/moodle/mod/optiksinav
-      # - ./plugins/local/optiksinav:/bitnami/moodle/local/optiksinav   # Faz 4
+      - ./plugins/local/optiksinav:/bitnami/moodle/local/optiksinav
 
 volumes:
   mariadb_data:
