@@ -105,10 +105,30 @@ if ($canmanage) {
         echo html_writer::div(html_writer::link($answerurl, get_string('preview_answerpdf', 'optiksinav'),
             ['target' => '_blank']));
     }
-} else {
-    // --- Öğrenci görünümü (sınav deneyimi Faz 2'de) ---
-    echo $OUTPUT->notification(get_string('attempt_comingsoon', 'optiksinav'),
-        \core\output\notification::NOTIFY_INFO);
+} else if (has_capability('mod/optiksinav:attempt', $context)) {
+    // --- Öğrenci görünümü: başlat / devam et / sonuç ---
+    $attempt = optiksinav_get_user_attempt($moduleinstance->id, $USER->id);
+    $attempturl = new moodle_url('/mod/optiksinav/attempt.php', ['id' => $cm->id]);
+    $reviewurl = new moodle_url('/mod/optiksinav/review.php', ['id' => $cm->id]);
+
+    if ($attempt && $attempt->state === OPTIKSINAV_STATE_FINISHED) {
+        echo $OUTPUT->notification(get_string('alreadyfinished', 'optiksinav'),
+            \core\output\notification::NOTIFY_INFO);
+        echo $OUTPUT->single_button($reviewurl, get_string('viewresult', 'optiksinav'), 'get');
+    } else if ($attempt && $attempt->state === OPTIKSINAV_STATE_INPROGRESS) {
+        echo $OUTPUT->single_button($attempturl, get_string('resumeattempt', 'optiksinav'), 'get');
+    } else if (!optiksinav_is_open($moduleinstance)) {
+        echo $OUTPUT->notification(get_string('notopen', 'optiksinav'),
+            \core\output\notification::NOTIFY_WARNING);
+    } else if ($moduleinstance->questioncount < 1 || !$hasexampdf) {
+        echo $OUTPUT->notification(get_string('notready', 'optiksinav'),
+            \core\output\notification::NOTIFY_WARNING);
+    } else {
+        // Yeni deneme başlat (POST + sesskey).
+        $starturl = new moodle_url('/mod/optiksinav/attempt.php',
+            ['id' => $cm->id, 'action' => 'start']);
+        echo $OUTPUT->single_button($starturl, get_string('startattempt', 'optiksinav'), 'post');
+    }
 }
 
 echo $OUTPUT->footer();

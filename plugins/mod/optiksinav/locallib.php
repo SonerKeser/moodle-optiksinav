@@ -25,6 +25,15 @@ define('OPTIKSINAV_FILEAREA_ANSWER', 'answerpdf');
 /** Itemid used for the single-file-per-activity areas. */
 define('OPTIKSINAV_FILE_ITEMID', 0);
 
+/** Attempt state: the student is still working. */
+define('OPTIKSINAV_STATE_INPROGRESS', 'inprogress');
+
+/** Attempt state: the attempt is submitted and graded. */
+define('OPTIKSINAV_STATE_FINISHED', 'finished');
+
+/** Attempt state: the attempt was abandoned (closed without finishing). */
+define('OPTIKSINAV_STATE_ABANDONED', 'abandoned');
+
 /**
  * Return the answer-option letters for a given option count, e.g. 5 → ['A','B','C','D','E'].
  *
@@ -138,4 +147,198 @@ function optiksinav_answer_key_filled_count(int $optiksinavid): int {
     return $DB->count_records_select('optiksinav_question',
         'optiksinavid = :id AND correctanswer IS NOT NULL AND correctanswer <> :empty',
         ['id' => $optiksinavid, 'empty' => '']);
+}
+
+/**
+ * Compute the effective deadline (unix time) for an attempt that starts now.
+ *
+ * The deadline is the earliest of (start + time limit) and the exam close time.
+ *
+ * @param stdClass $instance The optiksinav instance.
+ * @param int $timestart Attempt start time (unix).
+ * @return int Deadline unix time, or 0 when there is no deadline at all.
+ */
+function optiksinav_effective_deadline(stdClass $instance, int $timestart): int {
+    $deadlines = [];
+    if ($instance->timelimit > 0) {
+        $deadlines[] = $timestart + $instance->timelimit;
+    }
+    if ($instance->timeclose > 0) {
+        $deadlines[] = $instance->timeclose;
+    }
+    return $deadlines ? min($deadlines) : 0;
+}
+
+/**
+ * Return the user's current attempt for an exam (most recent), or null.
+ *
+ * @param int $optiksinavid The optiksinav instance id.
+ * @param int $userid The user id.
+ * @return stdClass|null The attempt record, or null when none exists.
+ */
+function optiksinav_get_user_attempt(int $optiksinavid, int $userid): ?stdClass {
+    global $DB;
+    $records = $DB->get_records('optiksinav_attempt',
+        ['optiksinavid' => $optiksinavid, 'userid' => $userid], 'attemptnumber DESC', '*', 0, 1);
+    return $records ? reset($records) : null;
+}
+
+/**
+ * Whether the exam is within its open/close window right now.
+ *
+ * @param stdClass $instance The optiksinav instance.
+ * @param int|null $now Time to test (defaults to now).
+ * @return bool True when the exam is currently accessible.
+ */
+function optiksinav_is_open(stdClass $instance, ?int $now = null): bool {
+    $now = $now ?? time();
+    if ($instance->timeopen > 0 && $now < $instance->timeopen) {
+        return false;
+    }
+    if ($instance->timeclose > 0 && $now > $instance->timeclose) {
+        return false;
+    }
+    return true;
+}
+
+/**
+ * Whether an in-progress attempt has passed its deadline.
+ *
+ * @param stdClass $attempt The attempt record.
+ * @param int|null $now Time to test (defaults to now).
+ * @return bool True when the attempt is overdue and should be auto-submitted.
+ */
+function optiksinav_attempt_overdue(stdClass $attempt, ?int $now = null): bool {
+    $now = $now ?? time();
+    return $attempt->timedue > 0 && $now > $attempt->timedue;
+}
+
+/**
+ * Create and persist a fresh in-progress attempt for a user.
+ *
+ * @param stdClass $instance The optiksinav instance.
+ * @param int $userid The user id.
+ * @return stdClass The created attempt record (with id populated).
+ */
+function optiksinav_start_attempt(stdClass $instance, int $userid): stdClass {
+    global $DB;
+    $now = time();
+
+    $previous = $DB->count_records('optiksinav_attempt',
+        ['optiksinavid' => $instance->id, 'userid' => $userid]);
+
+    $attempt = (object)[
+        'optiksinavid' => $instance->id,
+        'userid' => $userid,
+        'attemptnumber' => $previous + 1,
+        'state' => OPTIKSINAV_STATE_INPROGRESS,
+        'timestart' => $now,
+        'timefinish' => 0,
+        'timedue' => optiksinav_effective_deadline($instance, $now),
+        'correctcount' => 0,
+        'wrongcount' => 0,
+        'blankcount' => 0,
+        'net' => 0,
+        'grade' => null,
+        'timemodified' => $now,
+    ];
+    $attempt->id = $DB->insert_record('optiksinav_attempt', $attempt);
+    return $attempt;
+}
+
+/**
+ * Load a student's saved answers for an attempt as slot => answer.
+ *
+ * @param int $attemptid The attempt id.
+ * @return array<int,string|null> Map of slot to answer letter.
+ */
+function optiksinav_get_attempt_answers(int $attemptid): array {
+    global $DB;
+    $records = $DB->get_records('optiksinav_attempt_answer', ['attemptid' => $attemptid], 'slot ASC',
+        'slot, answer');
+    $answers = [];
+    foreach ($records as $record) {
+        $answers[(int)$record->slot] = $record->answer;
+    }
+    return $answers;
+}
+
+/**
+ * Upsert a single answer for an in-progress attempt.
+ *
+ * @param int $attemptid The attempt id.
+ * @param int $slot The question slot (1..N).
+ * @param string|null $answer The chosen option letter, or '' / null to clear.
+ * @return void
+ */
+function optiksinav_save_attempt_answer(int $attemptid, int $slot, ?string $answer): void {
+    global $DB;
+    $answer = ($answer === null || $answer === '') ? null : strtoupper($answer);
+
+    $existing = $DB->get_record('optiksinav_attempt_answer',
+        ['attemptid' => $attemptid, 'slot' => $slot]);
+    if ($existing) {
+        $DB->set_field('optiksinav_attempt_answer', 'answer', $answer, ['id' => $existing->id]);
+    } else {
+        $DB->insert_record('optiksinav_attempt_answer', (object)[
+            'attemptid' => $attemptid,
+            'slot' => $slot,
+            'answer' => $answer,
+        ]);
+    }
+}
+
+/**
+ * Score an attempt against the answer key and persist the result, marking it finished.
+ *
+ * Only slots with a defined correct answer are graded. Net = correct − wrong × penalty.
+ * The gradebook value is scaled into the activity's max grade; the actual gradebook push
+ * is wired in Faz 3.
+ *
+ * @param stdClass $attempt The in-progress attempt record.
+ * @param stdClass $instance The optiksinav instance.
+ * @return stdClass The updated attempt record (finished).
+ */
+function optiksinav_grade_attempt(stdClass $attempt, stdClass $instance): stdClass {
+    global $DB;
+
+    $key = optiksinav_get_answer_key($instance->id);
+    $answers = optiksinav_get_attempt_answers($attempt->id);
+
+    $correct = 0;
+    $wrong = 0;
+    $blank = 0;
+    $graded = 0;
+
+    for ($slot = 1; $slot <= $instance->questioncount; $slot++) {
+        $correctanswer = $key[$slot] ?? null;
+        if ($correctanswer === null || $correctanswer === '') {
+            continue; // Anahtarı girilmemiş slot puanlamaya katılmaz.
+        }
+        $graded++;
+        $given = $answers[$slot] ?? '';
+        if ($given === '' || $given === null) {
+            $blank++;
+        } else if (strtoupper($given) === strtoupper($correctanswer)) {
+            $correct++;
+        } else {
+            $wrong++;
+        }
+    }
+
+    $net = $correct - ($wrong * (float)$instance->penaltyratio);
+    $grade = $graded > 0 ? max(0, $net) / $graded * (float)$instance->grade : null;
+
+    $now = time();
+    $attempt->state = OPTIKSINAV_STATE_FINISHED;
+    $attempt->timefinish = $now;
+    $attempt->correctcount = $correct;
+    $attempt->wrongcount = $wrong;
+    $attempt->blankcount = $blank;
+    $attempt->net = $net;
+    $attempt->grade = $grade;
+    $attempt->timemodified = $now;
+    $DB->update_record('optiksinav_attempt', $attempt);
+
+    return $attempt;
 }

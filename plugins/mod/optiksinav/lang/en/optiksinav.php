@@ -69,6 +69,39 @@ $string['preview_exampdf'] = 'Preview question booklet';
 $string['preview_answerpdf'] = 'Preview solution booklet';
 $string['attempt_comingsoon'] = 'The exam-taking experience will be available soon.';
 
+// Attempt / taking the exam.
+$string['startattempt'] = 'Start exam';
+$string['resumeattempt'] = 'Resume exam';
+$string['finishattempt'] = 'Finish exam';
+$string['viewresult'] = 'View result';
+$string['confirmfinish'] = 'Are you sure you want to finish and submit the exam? This cannot be undone.';
+$string['alreadyfinished'] = 'You have already completed this exam.';
+$string['attemptsubmitted'] = 'Your exam has been submitted.';
+$string['timeexpired'] = 'Time is up — your exam was submitted automatically.';
+$string['notopen'] = 'This exam is not open for attempts right now.';
+$string['notready'] = 'This exam is not ready yet (missing booklet or questions).';
+$string['noquestionsyet'] = 'This exam has no questions configured.';
+$string['noexampdf'] = 'No question booklet has been uploaded for this exam.';
+$string['answeredcount'] = 'Answered: {$a}';
+$string['blankcount2'] = 'Blank: {$a}';
+$string['invalidaccess'] = 'Invalid access to this attempt.';
+
+// Result / review.
+$string['result'] = 'Result';
+$string['correct'] = 'Correct';
+$string['wrong'] = 'Wrong';
+$string['blank'] = 'Blank';
+$string['net'] = 'Net';
+$string['total'] = 'Total';
+$string['duration'] = 'Duration';
+$string['grade'] = 'Grade';
+$string['answerbreakdown'] = 'Answer breakdown';
+$string['questionno'] = 'No.';
+$string['youranswer'] = 'Your answer';
+$string['correctanswer'] = 'Correct answer';
+$string['outcome'] = 'Outcome';
+$string['ungraded'] = 'Not graded';
+
 // Misc.
 $string['modulename_help'] = 'The Optical exam activity presents a PDF question booklet alongside an A–E optical answer sheet, enforces the time limit on the server, computes a net score (correct − wrong × penalty) and feeds it to the gradebook.';
 $string['privacy:metadata'] = 'The Optical exam plugin stores exam attempts and answers for each user.';

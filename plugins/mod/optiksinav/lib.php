@@ -169,9 +169,19 @@ function optiksinav_pluginfile($course, $cm, $context, $filearea, $args, $forced
     require_capability('mod/optiksinav:view', $context);
 
     if ($filearea === OPTIKSINAV_FILEAREA_ANSWER) {
-        // Çözüm kitapçığı: şimdilik yalnızca rapor görme yetkisi olanlar (öğretmen/yönetici).
-        // Faz 2: denemesini bitirmiş öğrenciye de kendi çözüm erişimi açılacak.
-        require_capability('mod/optiksinav:viewreports', $context);
+        // Çözüm kitapçığı: öğretmen/yönetici her zaman; öğrenci ANCAK kendi denemesi bitince.
+        if (!has_capability('mod/optiksinav:viewreports', $context)) {
+            global $USER, $DB;
+            $instance = $DB->get_record('optiksinav', ['id' => $cm->instance], 'id', MUST_EXIST);
+            $hasfinished = $DB->record_exists('optiksinav_attempt', [
+                'optiksinavid' => $instance->id,
+                'userid' => $USER->id,
+                'state' => OPTIKSINAV_STATE_FINISHED,
+            ]);
+            if (!$hasfinished) {
+                send_file_not_found();
+            }
+        }
     }
 
     $itemid = (int)array_shift($args);

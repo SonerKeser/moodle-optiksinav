@@ -17,7 +17,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_optiksinav';   // Full name of the plugin.
-$plugin->version   = 2026060901;         // YYYYMMDDXX – bump on every schema/behaviour change.
+$plugin->version   = 2026060902;         // YYYYMMDDXX – bump on every schema/behaviour change.
 $plugin->requires  = 2024100700;         // Moodle 4.5.0 LTS.
-$plugin->maturity  = MATURITY_ALPHA;     // Faz 1: veri modeli + sınav oluşturma.
-$plugin->release   = 'v0.2.0-faz1';
+$plugin->maturity  = MATURITY_ALPHA;     // Faz 2: öğrenci sınav deneyimi.
+$plugin->release   = 'v0.3.0-faz2';

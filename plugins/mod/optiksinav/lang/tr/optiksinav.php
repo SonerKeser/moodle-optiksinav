@@ -69,6 +69,39 @@ $string['preview_exampdf'] = 'Soru kitapçığını önizle';
 $string['preview_answerpdf'] = 'Çözüm kitapçığını önizle';
 $string['attempt_comingsoon'] = 'Sınav alma deneyimi yakında etkin olacak.';
 
+// Deneme / sınava girme.
+$string['startattempt'] = 'Sınavı başlat';
+$string['resumeattempt'] = 'Sınava devam et';
+$string['finishattempt'] = 'Sınavı bitir';
+$string['viewresult'] = 'Sonucu gör';
+$string['confirmfinish'] = 'Sınavı bitirip teslim etmek istediğinize emin misiniz? Bu geri alınamaz.';
+$string['alreadyfinished'] = 'Bu sınavı zaten tamamladınız.';
+$string['attemptsubmitted'] = 'Sınavınız teslim edildi.';
+$string['timeexpired'] = 'Süre doldu — sınavınız otomatik olarak teslim edildi.';
+$string['notopen'] = 'Bu sınav şu anda girişe açık değil.';
+$string['notready'] = 'Bu sınav henüz hazır değil (kitapçık veya sorular eksik).';
+$string['noquestionsyet'] = 'Bu sınavda tanımlı soru yok.';
+$string['noexampdf'] = 'Bu sınav için soru kitapçığı yüklenmemiş.';
+$string['answeredcount'] = 'Cevaplanan: {$a}';
+$string['blankcount2'] = 'Boş: {$a}';
+$string['invalidaccess'] = 'Bu denemeye geçersiz erişim.';
+
+// Sonuç / inceleme.
+$string['result'] = 'Sonuç';
+$string['correct'] = 'Doğru';
+$string['wrong'] = 'Yanlış';
+$string['blank'] = 'Boş';
+$string['net'] = 'Net';
+$string['total'] = 'Toplam';
+$string['duration'] = 'Süre';
+$string['grade'] = 'Not';
+$string['answerbreakdown'] = 'Cevap dökümü';
+$string['questionno'] = 'No.';
+$string['youranswer'] = 'Cevabınız';
+$string['correctanswer'] = 'Doğru cevap';
+$string['outcome'] = 'Sonuç';
+$string['ungraded'] = 'Puanlanmadı';
+
 // Genel.
 $string['modulename_help'] = 'Optik Sınav aktivitesi, bir PDF soru kitapçığını A–E optik cevap formuyla birlikte sunar; süreyi sunucu tarafında zorlar, net puanı (doğru − yanlış × ceza) hesaplar ve not defterine işler.';
 $string['privacy:metadata'] = 'Optik Sınav eklentisi her kullanıcı için sınav denemelerini ve cevaplarını saklar.';
