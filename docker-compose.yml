@@ -3,7 +3,9 @@
 # böylece host'ta düzenle → konteynerde anında görünür.
 services:
   mariadb:
-    image: docker.io/bitnami/mariadb:11.4
+    # Not: Bitnami, Ağu 2025'te ücretsiz Docker Hub kataloğunu "bitnamilegacy"e taşıdı.
+    # Dev için sabitlenmiş legacy etiketleri kullanıyoruz.
+    image: docker.io/bitnamilegacy/mariadb:11.4.7
     environment:
       - ALLOW_EMPTY_PASSWORD=no
       - MARIADB_USER=bn_moodle
@@ -21,13 +23,14 @@ services:
       retries: 10
 
   moodle:
-    image: docker.io/bitnami/moodle:4.5
+    image: docker.io/bitnamilegacy/moodle:4.5
     depends_on:
       mariadb:
         condition: service_healthy
     ports:
-      - "8080:8080"
-      - "8443:8443"
+      # Host 8081/8444 — 8080 başka bir projece kullanılıyor olabilir.
+      - "8081:8080"
+      - "8444:8443"
     environment:
       - MOODLE_DATABASE_HOST=mariadb
       - MOODLE_DATABASE_PORT_NUMBER=3306
@@ -43,10 +46,13 @@ services:
     volumes:
       - moodle_data:/bitnami/moodle
       - moodledata_data:/bitnami/moodledata
-      # Eklentileri kaynaktan mount et (host'ta düzenle, konteynerde anında görünür)
+      # NOT (Bitnami tuzağı): Eklenti bind-mount'u ANCAK temiz ilk kurulum bittikten sonra
+      # etkinleştirilmeli. Aksi halde /bitnami/moodle ilk açılışta "boş değil" görünür ve
+      # Bitnami kurulum yerine geri-yükleme moduna girip takılır.
+      # 1. aşama (temiz kurulum): aşağıdaki satırlar YORUMDA kalır.
+      # 2. aşama (eklenti geliştirme): yorumu kaldır + `docker compose up -d` ile moodle'ı yeniden oluştur.
       - ./plugins/mod/optiksinav:/bitnami/moodle/mod/optiksinav
-      # local_ eklentisi Faz 4'te eklenecek:
-      # - ./plugins/local/optiksinav:/bitnami/moodle/local/optiksinav
+      # - ./plugins/local/optiksinav:/bitnami/moodle/local/optiksinav   # Faz 4
 
 volumes:
   mariadb_data:
