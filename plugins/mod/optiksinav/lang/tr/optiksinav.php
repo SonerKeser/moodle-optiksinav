@@ -113,6 +113,7 @@ $string['ungraded'] = 'Puanlanmadı';
 // Rapor.
 $string['student'] = 'Öğrenci';
 $string['viewreport'] = 'Raporu gör';
+$string['report'] = 'Rapor';
 $string['downloadcsv'] = 'CSV indir';
 $string['noattempts'] = 'Henüz deneme yok.';
 $string['state'] = 'Durum';

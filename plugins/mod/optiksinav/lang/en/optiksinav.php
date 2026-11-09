@@ -113,6 +113,7 @@ $string['ungraded'] = 'Not graded';
 // Report.
 $string['student'] = 'Student';
 $string['viewreport'] = 'View report';
+$string['report'] = 'Report';
 $string['downloadcsv'] = 'Download CSV';
 $string['noattempts'] = 'No attempts yet.';
 $string['state'] = 'State';
